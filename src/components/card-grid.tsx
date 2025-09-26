@@ -1,5 +1,5 @@
 import { getDictionary } from '@/lib/dictionaries';
-import { cardListings } from '@/lib/data';
+import { getCardListings } from '@/lib/data';
 import { CardItem } from './card-item';
 import { cn } from '@/lib/utils';
 import { Locale } from '@/i18n-config';
@@ -14,9 +14,8 @@ export async function CardGrid({
   const dict = await getDictionary(lang);
   const t = dict.home.cardGrid;
   
-  // In a real app, you would fetch data from a database here
-  // based on the searchParams.
-  const listings = cardListings;
+  // Fetch data from Firestore instead of using local data.
+  const listings = await getCardListings();
 
   const query = searchParams?.query as string | undefined;
   const conditions = (searchParams?.condition as string | undefined)?.split(',');

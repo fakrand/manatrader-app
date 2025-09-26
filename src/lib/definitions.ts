@@ -4,8 +4,8 @@ export type CardListing = {
   id: string;
   name: string;
   edition: string;
-  image: ImagePlaceholder;
-  seller: {
+  image?: ImagePlaceholder;
+  seller?: {
     name: string;
     reputation: number;
     avatarUrl: string;
