@@ -40,14 +40,11 @@ export default function RootLayout({
           pressStart2P.variable
         )}
       >
-        <AuthProvider>
-          <div className="relative flex min-h-screen flex-col">
-            <Header lang={params.lang} />
-            <main className="flex-1">{children}</main>
-            <Footer lang={params.lang} />
-          </div>
-          <Toaster />
-        </AuthProvider>
+        <div className="relative flex min-h-screen flex-col">
+          <Header lang={params.lang} />
+          <main className="flex-1">{children}</main>
+          <Footer lang={params.lang} />
+        </div>
       </body>
     </html>
   );
