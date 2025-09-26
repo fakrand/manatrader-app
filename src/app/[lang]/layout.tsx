@@ -1,4 +1,3 @@
-import './globals.css';
 import { Inter, Space_Grotesk, Press_Start_2P } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import Header from '@/components/header';
@@ -53,4 +52,3 @@ export default function RootLayout({
     </html>
   );
 }
-
