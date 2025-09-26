@@ -13,7 +13,7 @@ export default async function LandingPage({
   const dict = await getDictionary(lang);
   const t = dict.landing;
 
-  const response = await fetch('https://api.scryfall.com/cards/random?q=set%3Alea');
+  const response = await fetch('https://api.scryfall.com/cards/random?q=set%3Aleb');
   const card = await response.json();
   const cardImageUrl = card.image_uris?.large || "https://cards.scryfall.io/large/front/f/c/fce0d45c-7a4c-4088-a6d2-f447859cc8d2.jpg";
   const cardName = card.name || "Blacker Lotus";
