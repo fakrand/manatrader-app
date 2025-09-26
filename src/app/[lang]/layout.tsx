@@ -1,3 +1,4 @@
+import '../globals.css';
 import { Inter, Space_Grotesk, Press_Start_2P } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import Header from '@/components/header';
@@ -40,12 +41,19 @@ export default function RootLayout({
           pressStart2P.variable
         )}
       >
-        <div className="relative flex min-h-screen flex-col">
-          <Header lang={params.lang} />
-          <main className="flex-1">{children}</main>
-          <Footer lang={params.lang} />
-        </div>
+        <AuthProvider>
+          <div className="relative flex min-h-screen flex-col">
+            <Header lang={params.lang} />
+            <main className="flex-1">{children}</main>
+            <Footer lang={params.lang} />
+          </div>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
+}
+
+export async function generateStaticParams() {
+  return i18n.locales.map((locale) => ({ lang: locale }));
 }
