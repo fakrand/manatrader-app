@@ -10,5 +10,6 @@ const dictionaries = {
 
 export const getDictionary = async (locale: Locale) => {
   // Fallback to 'es' if the locale is not supported
-  return dictionaries[locale] ? dictionaries[locale]() : dictionaries.es();
+  const loader = dictionaries[locale] ?? dictionaries.es;
+  return loader();
 };
