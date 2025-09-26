@@ -13,6 +13,32 @@
   "footer": {
     "builtBy": "Hecho por ManaTrader. © {year} Todos los derechos reservados."
   },
+   "landing": {
+    "hero": {
+      "title": "El Mercado Principal de Magic: The Gathering en Perú",
+      "subtitle": "Compra, vende e intercambia tus cartas de Magic con una comunidad de confianza. Los mejores precios, garantizado.",
+      "ctaBrowse": "Explorar Cartas",
+      "ctaSell": "Comienza a Vender",
+      "cardDescription": "La carta más icónica en la historia de Magic."
+    },
+    "features": {
+      "supertitle": "Todo en un solo lugar",
+      "title": "Tu Centro de Magic",
+      "subtitle": "Conectamos a jugadores y tiendas de todo el Perú, facilitando la compra y venta de cartas de Magic: The Gathering de manera segura y sencilla.",
+      "buy": {
+        "title": "Compra",
+        "description": "Encuentra las cartas que necesitas para completar tu mazo. Compara precios de múltiples vendedores y obtén la mejor oferta."
+      },
+      "sell": {
+        "title": "Vende",
+        "description": "Convierte tus cartas extra en dinero. Publica tus cartas en minutos y llega a miles de compradores potenciales."
+      },
+      "trade": {
+        "title": "Intercambia",
+        "description": "Conéctate con otros jugadores para intercambiar cartas y completar tus colecciones. (Próximamente)"
+      }
+    }
+  },
   "home": {
     "filters": {
       "searchPlaceholder": "Buscar cartas...",

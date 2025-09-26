@@ -1,62 +1,90 @@
-import { Suspense } from 'react';
-import { CardGrid } from '@/components/card-grid';
-import { Filters } from '@/components/filters';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { getDictionary } from '@/lib/dictionaries';
 import { Locale } from '@/i18n-config';
+import { ArrowRight, ShoppingCart, Repeat, PlusCircle } from 'lucide-react';
+import Link from 'next/link';
 
-export default async function LangHome({
+export default async function LandingPage({
   params: { lang },
-  searchParams,
 }: {
   params: { lang: Locale };
-  searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   const dict = await getDictionary(lang);
+  const t = dict.landing;
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-        <aside className="lg:col-span-1">
-          <div className="sticky top-20">
-            <Suspense fallback={<FiltersSkeleton />}>
-              <Filters lang={lang} dict={dict.home.filters} />
-            </Suspense>
+    <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
+      <main className="flex-1">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-br from-primary/10 to-background">
+          <div className="container px-4 md:px-6">
+            <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
+              <div className="flex flex-col justify-center space-y-4">
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-bold font-headline tracking-tighter sm:text-5xl xl:text-6xl/none">
+                    {t.hero.title}
+                  </h1>
+                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                    {t.hero.subtitle}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                  <Button asChild size="lg">
+                    <Link href={`/${lang}/browse`}>
+                      {t.hero.ctaBrowse}
+                      <ArrowRight className="ml-2" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="secondary" size="lg">
+                     <Link href={`/${lang}/create-listing`}>
+                      {t.hero.ctaSell}
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center justify-center">
+                  <div className="w-[250px] h-[350px] lg:w-[300px] lg:h-[420px] bg-card rounded-lg shadow-2xl transform rotate-3 transition-transform duration-500 hover:rotate-0 hover:scale-105 flex items-center justify-center border-2 border-primary/50 p-4">
+                      <div className="text-center">
+                         <h3 className="font-headline text-lg">Black Lotus</h3>
+                         <p className="text-sm text-muted-foreground">Alpha</p>
+                         <div className="w-32 h-32 bg-muted rounded-full my-4 mx-auto animate-pulse"></div>
+                         <p className="text-xs text-muted-foreground">{t.hero.cardDescription}</p>
+                      </div>
+                  </div>
+              </div>
+            </div>
           </div>
-        </aside>
-        <div className="lg:col-span-3">
-          <Suspense fallback={<CardGridSkeleton />}>
-            <CardGrid lang={lang} searchParams={searchParams} />
-          </Suspense>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FiltersSkeleton() {
-  return (
-    <div className="space-y-6">
-      <Skeleton className="h-10 w-full" />
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-    </div>
-  );
-}
-
-function CardGridSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-      {Array.from({ length: 9 }).map((_, i) => (
-        <div key={i} className="space-y-2">
-          <Skeleton className="aspect-[3/4] w-full" />
-          <Skeleton className="h-5 w-4/5" />
-          <Skeleton className="h-5 w-1/2" />
-        </div>
-      ))}
+        </section>
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-background">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">{t.features.supertitle}</div>
+                <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-5xl">{t.features.title}</h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  {t.features.subtitle}
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
+              <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card shadow-md border border-border/20">
+                <ShoppingCart className="h-12 w-12 text-primary" />
+                <h3 className="mt-4 text-2xl font-bold font-headline">{t.features.buy.title}</h3>
+                <p className="mt-2 text-muted-foreground">{t.features.buy.description}</p>
+              </div>
+              <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card shadow-md border border-border/20">
+                <PlusCircle className="h-12 w-12 text-primary" />
+                <h3 className="mt-4 text-2xl font-bold font-headline">{t.features.sell.title}</h3>
+                <p className="mt-2 text-muted-foreground">{t.features.sell.description}</p>
+              </div>
+               <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card shadow-md border border-border/20">
+                <Repeat className="h-12 w-12 text-primary" />
+                <h3 className="mt-4 text-2xl font-bold font-headline">{t.features.trade.title}</h3>
+                <p className="mt-2 text-muted-foreground">{t.features.trade.description}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

@@ -13,6 +13,32 @@
   "footer": {
     "builtBy": "Built by ManaTrader. © {year} All rights reserved."
   },
+  "landing": {
+    "hero": {
+      "title": "The Premier Magic: The Gathering Marketplace in Peru",
+      "subtitle": "Buy, sell, and trade your Magic singles with a trusted community of players. The best prices, guaranteed.",
+      "ctaBrowse": "Browse Cards",
+      "ctaSell": "Start Selling",
+      "cardDescription": "The most iconic card in Magic's history."
+    },
+    "features": {
+      "supertitle": "All in one place",
+      "title": "Your Magic Hub",
+      "subtitle": "We connect players and stores throughout Peru, facilitating the purchase and sale of Magic: The Gathering cards in a safe and simple way.",
+      "buy": {
+        "title": "Buy",
+        "description": "Find the cards you need to complete your deck. Compare prices from multiple sellers and get the best deal."
+      },
+      "sell": {
+        "title": "Sell",
+        "description": "Turn your extra cards into cash. List your cards in minutes and reach thousands of potential buyers."
+      },
+      "trade": {
+        "title": "Trade",
+        "description": "Connect with other players to trade cards and complete your collections. (Coming Soon)"
+      }
+    }
+  },
   "home": {
     "filters": {
       "searchPlaceholder": "Search for cards...",
