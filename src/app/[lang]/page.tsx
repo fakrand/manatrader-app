@@ -13,6 +13,11 @@ export default async function LandingPage({
   const dict = await getDictionary(lang);
   const t = dict.landing;
 
+  const response = await fetch('https://api.scryfall.com/cards/random?q=set%3Alea');
+  const card = await response.json();
+  const cardImageUrl = card.image_uris?.large || "https://cards.scryfall.io/large/front/f/c/fce0d45c-7a4c-4088-a6d2-f447859cc8d2.jpg";
+  const cardName = card.name || "Blacker Lotus";
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
       <main className="flex-1">
@@ -45,8 +50,8 @@ export default async function LandingPage({
               <div className="flex items-center justify-center">
                   <div className="w-[250px] h-[350px] lg:w-[300px] lg:h-[420px] bg-transparent rounded-lg shadow-2xl transform rotate-3 transition-transform duration-500 hover:rotate-0 hover:scale-105 flex items-center justify-center p-4">
                       <Image
-                        src="https://cards.scryfall.io/large/front/f/c/fce0d45c-7a4c-4088-a6d2-f447859cc8d2.jpg"
-                        alt="Blacker Lotus"
+                        src={cardImageUrl}
+                        alt={cardName}
                         width={300}
                         height={420}
                         className="rounded-xl shadow-lg"
