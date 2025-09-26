@@ -13,3 +13,5 @@ export const getDictionary = async (locale: Locale) => {
   const loader = dictionaries[locale] ?? dictionaries.es;
   return loader();
 };
+
+    

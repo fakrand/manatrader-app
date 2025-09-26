@@ -8,11 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { getDictionary } from "@/lib/dictionaries";
 import { HelpCircle, Image as ImageIcon } from "lucide-react";
 import { Locale } from "@/i18n-config";
 import { cn } from '@/lib/utils';
-import { cardListings } from '@/lib/data'; // Assuming we have some card names data
+import type { getDictionary } from '@/lib/dictionaries';
 
 // This would ideally come from a comprehensive database fetched from an API
 const MOCK_CARD_NAMES = [
@@ -48,7 +47,7 @@ function CreateListingClientPage({ t, lang }: CreateListingPageProps) {
         return MOCK_CARD_NAMES.filter(name =>
             name.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    }, [searchQuery, MOCK_CARD_NAMES]);
+    }, [searchQuery]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -254,8 +253,9 @@ function CreateListingClientPage({ t, lang }: CreateListingPageProps) {
 }
 
 
-// This is a new async Server Component to fetch the dictionary
+// This is the new async Server Component to fetch the dictionary
 export default async function CreateListingPage({ params: { lang } }: { params: { lang: Locale } }) {
+    const { getDictionary } = await import('@/lib/dictionaries');
     const dict = await getDictionary(lang);
     const t = dict.createListing;
     
@@ -266,3 +266,7 @@ export default async function CreateListingPage({ params: { lang } }: { params: 
         </Suspense>
     );
 }
+
+    
+
+    
