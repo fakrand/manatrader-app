@@ -10,12 +10,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { getDictionary } from '@/lib/dictionaries';
 
 interface CardItemProps {
   listing: CardListing;
+  lang: 'es' | 'en';
 }
 
-export function CardItem({ listing }: CardItemProps) {
+export async function CardItem({ listing, lang }: CardItemProps) {
+  const dict = await getDictionary(lang);
+  const t = dict.home.cardItem;
   return (
     <div className="group relative">
       <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-card shadow-lg group-hover:shadow-primary/50 transition-shadow">
@@ -29,7 +33,7 @@ export function CardItem({ listing }: CardItemProps) {
         />
          {listing.isFoil && (
           <Badge variant="outline" className="absolute top-2 right-2 bg-background/70 backdrop-blur text-yellow-300 border-yellow-400">
-            Foil
+            {t.foil}
           </Badge>
         )}
       </div>
@@ -62,7 +66,7 @@ export function CardItem({ listing }: CardItemProps) {
             <TooltipContent>
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                <p>{listing.seller.reputation.toFixed(1)} Reputation</p>
+                <p>{t.reputation.replace('{reputation}', listing.seller.reputation.toFixed(1))}</p>
               </div>
             </TooltipContent>
           </Tooltip>
@@ -71,7 +75,7 @@ export function CardItem({ listing }: CardItemProps) {
        <div className="absolute bottom-24 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <Button size="icon" variant="default" className='bg-accent hover:bg-accent/80 text-accent-foreground'>
           <ShoppingCart className="h-5 w-5" />
-          <span className="sr-only">Add to cart</span>
+          <span className="sr-only">{t.addToCart}</span>
         </Button>
       </div>
     </div>

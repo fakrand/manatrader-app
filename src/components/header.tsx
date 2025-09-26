@@ -1,12 +1,10 @@
 import Link from 'next/link';
 import {
   CircleUserRound,
-  LayoutGrid,
   Library,
   PlusCircle,
   Settings,
   ShoppingCart,
-  Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,15 +19,19 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Logo } from './logo';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { getDictionary } from '@/lib/dictionaries';
+import { LanguageSwitcher } from './language-switcher';
 
-export default function Header() {
+export default async function Header({ lang }: { lang: 'es' | 'en' }) {
   const userAvatar = PlaceHolderImages.find((img) => img.id === 'user_avatar_1');
+  const dict = await getDictionary(lang);
+  const t = dict.header;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
+          <Link href={`/${lang}`} className="mr-6 flex items-center space-x-2">
             <Logo />
             <span className="hidden font-bold sm:inline-block font-headline text-lg">
               ManaTrader
@@ -37,16 +39,16 @@ export default function Header() {
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             <Link
-              href="/"
+              href={`/${lang}`}
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
-              Browse
+              {t.browse}
             </Link>
             <Link
-              href="/create-listing"
+              href={`/${lang}/create-listing`}
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
-              Sell
+              {t.sell}
             </Link>
           </nav>
         </div>
@@ -55,10 +57,11 @@ export default function Header() {
             {/* Mobile Nav could go here */}
           </div>
           <nav className="flex items-center">
+            <LanguageSwitcher lang={lang} />
             <Button variant="ghost" size="icon" asChild>
-              <Link href="/cart">
+              <Link href={`/${lang}/cart`}>
                 <ShoppingCart className="h-5 w-5" />
-                <span className="sr-only">Shopping Cart</span>
+                <span className="sr-only">{t.shoppingCart}</span>
               </Link>
             </Button>
             <DropdownMenu>
@@ -84,30 +87,30 @@ export default function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
-                    <Link href="/profile">
+                    <Link href={`/${lang}/profile`}>
                       <CircleUserRound className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                      <span>{t.profile}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Library className="mr-2 h-4 w-4" />
-                    <span>My Collection</span>
+                    <span>{t.myCollection}</span>
                   </DropdownMenuItem>
                    <DropdownMenuItem asChild>
-                    <Link href="/create-listing">
+                    <Link href={`/${lang}/create-listing`}>
                       <PlusCircle className="mr-2 h-4 w-4" />
-                      <span>New Listing</span>
+                      <span>{t.newListing}</span>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                  <span>{t.settings}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <span>Log out</span>
+                  <span>{t.logout}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

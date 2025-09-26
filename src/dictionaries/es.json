@@ -1,0 +1,111 @@
+
+{
+  "header": {
+    "browse": "Explorar",
+    "sell": "Vender",
+    "shoppingCart": "Carrito de Compras",
+    "profile": "Perfil",
+    "myCollection": "Mi Colección",
+    "newListing": "Nueva Publicación",
+    "settings": "Configuración",
+    "logout": "Cerrar Sesión"
+  },
+  "footer": {
+    "builtBy": "Hecho por ManaTrader. © {year} Todos los derechos reservados."
+  },
+  "home": {
+    "filters": {
+      "searchPlaceholder": "Buscar cartas...",
+      "condition": "Condición",
+      "language": "Idioma",
+      "price": "Precio",
+      "color": "Color",
+      "edition": "Edición",
+      "manaCost": "Coste de Maná"
+    },
+    "cardGrid": {
+      "noCardsFound": "No se encontraron cartas",
+      "adjustFilters": "Intenta ajustar tu búsqueda o filtros."
+    },
+    "cardItem": {
+      "foil": "Foil",
+      "addToCart": "Añadir al carrito",
+      "reputation": "{reputation} de Reputación"
+    }
+  },
+  "cart": {
+    "emptyTitle": "Tu carrito está vacío",
+    "emptyDescription": "Parece que aún no has añadido ninguna carta.",
+    "browseCards": "Explorar Cartas",
+    "title": "Carrito de Compras",
+    "orderFrom": "Pedido de {vendor}",
+    "checkoutSummary": "Resumen de Compra",
+    "subtotal": "Subtotal",
+    "shipping": "Envío",
+    "shippingCalculated": "Calculado en el siguiente paso",
+    "total": "Total",
+    "proceedToCheckout": "Proceder a la Compra"
+  },
+  "createListing": {
+    "title": "Crear Nueva Publicación",
+    "description": "Publica tus cartas sueltas de Magic: The Gathering para venta o intercambio.",
+    "step1Title": "Paso 1: Encuentra tu carta",
+    "step1Description": "Busca en la base de datos de Scryfall para encontrar la carta exacta que quieres publicar.",
+    "step1SearchPlaceholder": "Buscar por nombre de carta... ej., Sol Ring",
+    "step2Title": "Paso 2: Especifica los Detalles",
+    "step2Description": "Estás publicando: {cardName}",
+    "priceLabel": "Precio (Soles Peruanos)",
+    "pricePlaceholder": "ej., 25.50",
+    "marketPrice": "Precio de Mercado TCGplayer: ${price}",
+    "quantityLabel": "Cantidad (Stock)",
+    "conditionLabel": "Condición",
+    "selectCondition": "Selecciona la condición",
+    "conditions": {
+      "NM": "Casi Nueva (NM)",
+      "LP": "Ligeramente Jugada (LP)",
+      "MP": "Moderadamente Jugada (MP)",
+      "HP": "Muy Jugada (HP)",
+      "DMG": "Dañada (DMG)"
+    },
+    "languageLabel": "Idioma",
+    "selectLanguage": "Selecciona el idioma",
+    "languages": {
+      "en": "Inglés",
+      "es": "Español",
+      "jp": "Japonés",
+      "de": "Alemán",
+      "fr": "Francés"
+    },
+    "foilLabel": "Tipo de Foil",
+    "selectFoil": "Selecciona el tipo de foil",
+    "foils": {
+      "none": "Ninguno",
+      "foil": "Foil",
+      "etched": "Etched",
+      "galaxy": "Galaxy Foil"
+    },
+    "imagesLabel": "Imágenes (Opcional)",
+    "frontImage": "Imagen Frontal",
+    "backImage": "Imagen Trasera",
+    "commentsLabel": "Comentarios Adicionales",
+    "commentsPlaceholder": "Cualquier detalle sobre la carta, ej., 'Ligero desgaste en la esquina superior izquierda'.",
+    "publishListing": "Publicar",
+    "listingLimitReached": "Límite de Publicaciones Alcanzado"
+  },
+  "profile": {
+    "editProfile": "Editar Perfil",
+    "listingsUsed": "Publicaciones Usadas",
+    "averageRating": "({rating} de Calificación Promedio)",
+    "tierTooltip": "Plan {tier}: {limit} publicaciones activas máx.",
+    "myListings": "Mis Publicaciones",
+    "myListingsDescription": "Gestiona tus publicaciones activas de compra y venta.",
+    "noActiveListings": "Aún no hay publicaciones activas.",
+    "reputationAndReviews": "Reputación y Reseñas",
+    "reviewsDescription": "Reseñas de tus transacciones completadas.",
+    "noReviews": "Aún no hay reseñas."
+  },
+  "metadata": {
+    "title": "ManaTrader",
+    "description": "El mercado principal de cartas sueltas de Magic: The Gathering en Perú."
+  }
+}

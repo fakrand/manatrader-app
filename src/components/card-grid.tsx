@@ -1,12 +1,17 @@
+import { getDictionary } from '@/lib/dictionaries';
 import { cardListings } from '@/lib/data';
 import { CardItem } from './card-item';
 import { cn } from '@/lib/utils';
 
 export async function CardGrid({
+  lang,
   searchParams,
 }: {
+  lang: 'es' | 'en';
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
+  const dict = await getDictionary(lang);
+  const t = dict.home.cardGrid;
   // Simulate network latency
   await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -38,9 +43,9 @@ export async function CardGrid({
   if (filteredListings.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-12 text-center h-[50vh]">
-        <h3 className="text-2xl font-bold tracking-tight font-headline">No cards found</h3>
+        <h3 className="text-2xl font-bold tracking-tight font-headline">{t.noCardsFound}</h3>
         <p className="text-muted-foreground">
-          Try adjusting your search or filters.
+          {t.adjustFilters}
         </p>
       </div>
     )
@@ -54,7 +59,7 @@ export async function CardGrid({
       "xl:grid-cols-3"
     )}>
       {filteredListings.map((listing) => (
-        <CardItem key={listing.id} listing={listing} />
+        <CardItem key={listing.id} listing={listing} lang={lang} />
       ))}
     </div>
   );

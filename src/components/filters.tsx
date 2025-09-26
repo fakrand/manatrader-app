@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition, useCallback, useEffect } from 'react';
+import { useState, useTransition, useCallback } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Search, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useDebounceCallback } from 'usehooks-ts'
 
 import { Input } from '@/components/ui/input';
@@ -19,17 +19,22 @@ import { Button } from './ui/button';
 import { ManaSymbol } from './mana-symbol';
 import { cn } from '@/lib/utils';
 import { fetchSmartFilters } from '@/app/actions';
+import { getDictionary } from '@/lib/dictionaries';
 
 const conditions = ['NM', 'LP', 'MP', 'HP', 'DMG'];
 const languages = ['English', 'Spanish', 'Japanese'];
 const colors: ('W' | 'U' | 'B' | 'R' | 'G')[] = ['W', 'U', 'B', 'R', 'G'];
 
-export function Filters() {
+type Dictionary = Awaited<ReturnType<typeof getDictionary>>['home']['filters'];
+
+export function Filters({ lang, dict }: { lang: 'es' | 'en', dict: Dictionary }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [suggestedFilters, setSuggestedFilters] = useState<string[]>([]);
+
+  const t = dict;
 
   const createQueryString = useCallback(
     (params: Record<string, string | number | null>) => {
@@ -79,15 +84,6 @@ export function Filters() {
   };
 
   const selectedPrice = searchParams.get('price') ? [Number(searchParams.get('price'))] : [2000];
-
-  const filterSections = [
-    { name: 'Condition', options: conditions },
-    { name: 'Language', options: languages },
-    { name: 'Price' },
-    { name: 'Color' },
-    { name: 'Edition', options: ['Alpha', 'Beta', 'Unlimited', 'Revised', '4th Edition', 'Strixhaven'] },
-    { name: 'Cost of Mana', nameKey: 'Cost of Mana' },
-  ];
   
   const getFilterClass = (filterName: string) => {
     return cn("w-full", {
@@ -102,7 +98,7 @@ export function Filters() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search for cards..."
+          placeholder={t.searchPlaceholder}
           className="pl-9"
           value={searchParams.get('query') ?? ''}
           onChange={handleQueryChange}
@@ -111,7 +107,7 @@ export function Filters() {
 
       <Accordion type="multiple" defaultValue={defaultAccordionValues} className="w-full">
         <AccordionItem value="condition" className={getFilterClass('Condition')}>
-          <AccordionTrigger>Condition</AccordionTrigger>
+          <AccordionTrigger>{t.condition}</AccordionTrigger>
           <AccordionContent>
             {conditions.map((condition) => (
               <div key={condition} className="flex items-center space-x-2 py-1">
@@ -123,7 +119,7 @@ export function Filters() {
         </AccordionItem>
 
         <AccordionItem value="language" className={getFilterClass('Language')}>
-          <AccordionTrigger>Language</AccordionTrigger>
+          <AccordionTrigger>{t.language}</AccordionTrigger>
           <AccordionContent>
             {languages.map((lang) => (
               <div key={lang} className="flex items-center space-x-2 py-1">
@@ -135,7 +131,7 @@ export function Filters() {
         </AccordionItem>
 
         <AccordionItem value="price" className={getFilterClass('Price')}>
-          <AccordionTrigger>Price</AccordionTrigger>
+          <AccordionTrigger>{t.price}</AccordionTrigger>
           <AccordionContent>
             <div className="p-2 space-y-4">
               <Slider
@@ -153,7 +149,7 @@ export function Filters() {
         </AccordionItem>
 
          <AccordionItem value="color" className={getFilterClass('Color')}>
-          <AccordionTrigger>Color</AccordionTrigger>
+          <AccordionTrigger>{t.color}</AccordionTrigger>
           <AccordionContent>
             <div className="flex justify-around p-2">
               {colors.map((color) => {
@@ -175,7 +171,7 @@ export function Filters() {
         </AccordionItem>
 
          <AccordionItem value="cost" className={getFilterClass('Cost of Mana')}>
-          <AccordionTrigger>Cost of Mana</AccordionTrigger>
+          <AccordionTrigger>{t.manaCost}</AccordionTrigger>
           <AccordionContent>
              <div className="p-2 space-y-4">
                <Slider

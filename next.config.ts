@@ -30,6 +30,25 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+   async redirects() {
+    return [
+      {
+        source: '/cart',
+        destination: '/es/cart',
+        permanent: true,
+      },
+       {
+        source: '/create-listing',
+        destination: '/es/create-listing',
+        permanent: true,
+      },
+       {
+        source: '/profile',
+        destination: '/es/profile',
+        permanent: true,
+      },
+    ]
+  },
 };
 
 export default nextConfig;
