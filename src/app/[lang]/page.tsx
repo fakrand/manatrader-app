@@ -4,6 +4,16 @@ import { Locale } from '@/i18n-config';
 import { ArrowRight, ShoppingCart, Repeat, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
+
+async function getRandomCard() {
+  const response = await fetch('https://api.scryfall.com/cards/random?q=set%3Aleb');
+  const card = await response.json();
+  return {
+    imageUrl: card.image_uris?.large || "https://cards.scryfall.io/large/front/f/c/fce0d45c-7a4c-4088-a6d2-f447859cc8d2.jpg",
+    name: card.name || "Blacker Lotus",
+  };
+}
 
 export default async function LandingPage({
   params: { lang },
@@ -13,10 +23,13 @@ export default async function LandingPage({
   const dict = await getDictionary(lang);
   const t = dict.landing;
 
-  const response = await fetch('https://api.scryfall.com/cards/random?q=set%3Aleb');
-  const card = await response.json();
-  const cardImageUrl = card.image_uris?.large || "https://cards.scryfall.io/large/front/f/c/fce0d45c-7a4c-4088-a6d2-f447859cc8d2.jpg";
-  const cardName = card.name || "Blacker Lotus";
+  const [card1, card2, card3] = await Promise.all([
+    getRandomCard(),
+    getRandomCard(),
+    getRandomCard(),
+  ]);
+
+  const cards = [card1, card2, card3];
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
@@ -47,17 +60,34 @@ export default async function LandingPage({
                   </Button>
                 </div>
               </div>
-              <div className="flex items-center justify-center">
-                  <div className="w-[250px] h-[350px] lg:w-[300px] lg:h-[420px] bg-transparent rounded-lg shadow-2xl transform rotate-3 transition-transform duration-500 hover:rotate-0 hover:scale-105 flex items-center justify-center p-4">
-                      <Image
-                        src={cardImageUrl}
-                        alt={cardName}
-                        width={300}
-                        height={420}
-                        className="rounded-xl shadow-lg"
-                        data-ai-hint="magic card"
-                      />
-                  </div>
+              <div className="relative flex items-center justify-center h-[350px] lg:h-[420px]">
+                {cards.map((card, index) => {
+                  const rotations = ['-rotate-6', 'rotate-2', 'rotate-8'];
+                  const zIndexes = ['z-0', 'z-10', 'z-20'];
+                  const margins = ['-ml-16', 'ml-0', 'ml-16'];
+
+                  return (
+                     <div 
+                      key={card.name + index}
+                      className={cn(
+                        "absolute w-[200px] h-[280px] lg:w-[240px] lg:h-[336px] bg-transparent rounded-lg shadow-2xl transition-transform duration-500 hover:scale-110 flex items-center justify-center",
+                        rotations[index],
+                        zIndexes[index],
+                        margins[index]
+                      )}
+                      style={{ transformOrigin: 'bottom center' }}
+                    >
+                        <Image
+                          src={card.imageUrl}
+                          alt={card.name}
+                          width={240}
+                          height={336}
+                          className="rounded-xl shadow-lg"
+                          data-ai-hint="magic card"
+                        />
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
