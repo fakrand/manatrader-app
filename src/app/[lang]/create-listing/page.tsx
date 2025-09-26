@@ -1,3 +1,7 @@
+
+"use client";
+
+import { useState, useMemo, useRef, useEffect, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,11 +11,92 @@ import { Textarea } from "@/components/ui/textarea";
 import { getDictionary } from "@/lib/dictionaries";
 import { HelpCircle, Image as ImageIcon } from "lucide-react";
 import { Locale } from "@/i18n-config";
+import { cn } from '@/lib/utils';
+import { cardListings } from '@/lib/data'; // Assuming we have some card names data
 
-export default async function CreateListingPage({ params: { lang } }: { params: { lang: Locale } }) {
-    const dict = await getDictionary(lang);
-    const t = dict.createListing;
-    const listingLimitReached = false; // This would be derived from user data
+// This would ideally come from a comprehensive database fetched from an API
+const MOCK_CARD_NAMES = [
+    "Sol Ring",
+    "Swords to Plowshares",
+    "Black Lotus",
+    "Brainstorm",
+    "Lightning Bolt",
+    "Counterspell",
+    "Dark Ritual",
+    "Demonic Tutor",
+    "Birds of Paradise",
+    "Wrath of God"
+];
+
+
+type CreateListingPageProps = {
+    t: Awaited<ReturnType<typeof getDictionary>>['createListing'];
+    lang: Locale;
+};
+
+function CreateListingClientPage({ t, lang }: CreateListingPageProps) {
+    const listingLimitReached = false;
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [activeSuggestion, setActiveSuggestion] = useState(-1);
+    const [selectedCard, setSelectedCard] = useState<string | null>(null);
+    const suggestionsRef = useRef<HTMLUListElement>(null);
+
+    const filteredSuggestions = useMemo(() => {
+        if (!searchQuery) return [];
+        return MOCK_CARD_NAMES.filter(name =>
+            name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [searchQuery, MOCK_CARD_NAMES]);
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        setSelectedCard(null);
+        if (value) {
+            setSuggestions(filteredSuggestions);
+        } else {
+            setSuggestions([]);
+        }
+        setActiveSuggestion(-1);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (suggestions.length > 0) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setActiveSuggestion(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setActiveSuggestion(prev => (prev > 0 ? prev - 1 : prev));
+            } else if (e.key === 'Enter' && activeSuggestion > -1) {
+                e.preventDefault();
+                handleSuggestionClick(suggestions[activeSuggestion]);
+            } else if (e.key === 'Escape') {
+                setSuggestions([]);
+            }
+        }
+    };
+
+    const handleSuggestionClick = (suggestion: string) => {
+        setSearchQuery(suggestion);
+        setSelectedCard(suggestion);
+        setSuggestions([]);
+    };
+    
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+          if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+            setSuggestions([]);
+          }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+          document.removeEventListener("mousedown", handleClickOutside);
+        };
+      }, [suggestionsRef]);
+
 
     return (
         <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -24,10 +109,48 @@ export default async function CreateListingPage({ params: { lang } }: { params: 
                         <CardTitle>{t.step1Title}</CardTitle>
                         <CardDescription>{t.step1Description}</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="space-y-2">
-                             <Label htmlFor="card-search">{t.step1SearchLabel}</Label>
-                            <Input id="card-search" placeholder={t.step1SearchPlaceholder} />
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2 relative">
+                            <Label htmlFor="card-search">{t.step1SearchLabel}</Label>
+                            <Input
+                                id="card-search"
+                                placeholder={t.step1SearchPlaceholder}
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                onKeyDown={handleKeyDown}
+                                autoComplete="off"
+                            />
+                            {suggestions.length > 0 && (
+                                <ul ref={suggestionsRef} className="absolute z-10 w-full bg-card border border-border rounded-md mt-1 shadow-lg">
+                                    {suggestions.map((suggestion, index) => (
+                                        <li
+                                            key={suggestion}
+                                            className={cn(
+                                                "px-3 py-2 cursor-pointer hover:bg-muted",
+                                                index === activeSuggestion && "bg-muted"
+                                            )}
+                                            onClick={() => handleSuggestionClick(suggestion)}
+                                        >
+                                            {suggestion}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="edition">{t.editionLabel}</Label>
+                            <Select disabled={!selectedCard}>
+                                <SelectTrigger id="edition">
+                                    <SelectValue placeholder={t.selectEdition} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {/* In a real scenario, this would be populated based on the selected card */}
+                                    <SelectItem value="LEA">Limited Edition Alpha</SelectItem>
+                                    <SelectItem value="LEB">Limited Edition Beta</SelectItem>
+                                    <SelectItem value="2ED">Unlimited Edition</SelectItem>
+                                    <SelectItem value="CMR">Commander Legends</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </CardContent>
                 </Card>
@@ -35,7 +158,12 @@ export default async function CreateListingPage({ params: { lang } }: { params: 
                 <Card>
                     <CardHeader>
                         <CardTitle>{t.step2Title}</CardTitle>
-                        <CardDescription>{t.step2Description}</CardDescription>
+                        <CardDescription>
+                            {selectedCard ? 
+                                t.step2DescriptionSelected.replace('{cardName}', selectedCard) : 
+                                t.step2Description
+                            }
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
@@ -66,7 +194,7 @@ export default async function CreateListingPage({ params: { lang } }: { params: 
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="language">{t.languageLabel}</Label>
-                            <Select>
+                            <Select disabled={!selectedCard}>
                                 <SelectTrigger id="language">
                                     <SelectValue placeholder={t.selectLanguage} />
                                 </SelectTrigger>
@@ -81,7 +209,7 @@ export default async function CreateListingPage({ params: { lang } }: { params: 
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="foil">{t.foilLabel}</Label>
-                            <Select>
+                            <Select disabled={!selectedCard}>
                                 <SelectTrigger id="foil">
                                     <SelectValue placeholder={t.selectFoil} />
                                 </SelectTrigger>
@@ -122,5 +250,19 @@ export default async function CreateListingPage({ params: { lang } }: { params: 
                 </div>
             </form>
         </div>
+    );
+}
+
+
+// This is a new async Server Component to fetch the dictionary
+export default async function CreateListingPage({ params: { lang } }: { params: { lang: Locale } }) {
+    const dict = await getDictionary(lang);
+    const t = dict.createListing;
+    
+    // We wrap the client component in Suspense for better loading experience
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <CreateListingClientPage t={t} lang={lang} />
+        </Suspense>
     );
 }
