@@ -62,15 +62,15 @@ export default async function LandingPage({
               </div>
               <div className="relative flex items-center justify-center h-[350px] lg:h-[420px]">
                 {cards.map((card, index) => {
-                  const rotations = ['-rotate-6', 'rotate-2', 'rotate-8'];
-                  const zIndexes = ['z-0', 'z-10', 'z-20'];
-                  const margins = ['-ml-16', 'ml-0', 'ml-16'];
+                  const rotations = ['-rotate-12', 'rotate-0', 'rotate-12'];
+                  const zIndexes = ['z-0', 'z-10', 'z-0'];
+                  const margins = ['-ml-40', 'ml-0', 'ml-40'];
 
                   return (
                      <div 
                       key={card.name + index}
                       className={cn(
-                        "absolute w-[200px] h-[280px] lg:w-[240px] lg:h-[336px] bg-transparent rounded-lg shadow-2xl transition-transform duration-500 hover:scale-110 flex items-center justify-center",
+                        "absolute w-[200px] h-[280px] lg:w-[240px] lg:h-[336px] bg-transparent rounded-lg shadow-2xl transition-transform duration-500 hover:scale-110 hover:z-20 flex items-center justify-center",
                         rotations[index],
                         zIndexes[index],
                         margins[index]
