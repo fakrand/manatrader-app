@@ -2,12 +2,13 @@ import { getDictionary } from '@/lib/dictionaries';
 import { cardListings } from '@/lib/data';
 import { CardItem } from './card-item';
 import { cn } from '@/lib/utils';
+import { Locale } from '@/i18n-config';
 
 export async function CardGrid({
   lang,
   searchParams,
 }: {
-  lang: 'es' | 'en';
+  lang: Locale;
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   const dict = await getDictionary(lang);

@@ -5,6 +5,7 @@ import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { getDictionary } from '@/lib/dictionaries';
+import { i18n, Locale } from '@/i18n-config';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });
@@ -14,8 +15,7 @@ const pressStart2P = Press_Start_2P({
   variable: '--font-press-start-2p',
 });
 
-
-export async function generateMetadata({ params: { lang } }: { params: { lang: 'es' | 'en' } }) {
+export async function generateMetadata({ params: { lang } }: { params: { lang: Locale } }) {
   const dictionary = await getDictionary(lang);
   return {
     title: dictionary.metadata.title,
@@ -23,13 +23,12 @@ export async function generateMetadata({ params: { lang } }: { params: { lang: '
   };
 }
 
-
 export default function RootLayout({
   children,
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { lang: 'es' | 'en' };
+  params: { lang: Locale };
 }>) {
   return (
     <html lang={params.lang} className="dark">
@@ -53,5 +52,5 @@ export default function RootLayout({
 }
 
 export async function generateStaticParams() {
-  return [{ lang: 'en' }, { lang: 'es' }];
+  return i18n.locales.map((locale) => ({ lang: locale }));
 }

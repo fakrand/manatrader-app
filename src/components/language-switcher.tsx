@@ -10,13 +10,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
+import { i18n, Locale } from '@/i18n-config';
 
-export function LanguageSwitcher({ lang }: { lang: 'es' | 'en' }) {
+export function LanguageSwitcher({ lang }: { lang: Locale }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleLanguageChange = (newLang: 'es' | 'en') => {
-    // This will replace the current lang segment in the URL
+  const handleLanguageChange = (newLang: Locale) => {
+    if (!pathname) return;
+    const days = 30;
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = '; expires=' + date.toUTCString();
+    document.cookie = `NEXT_LOCALE=${newLang};expires=${expires};path=/`;
+
     const newPath = pathname.replace(`/${lang}`, `/${newLang}`);
     router.replace(newPath);
   };
@@ -30,12 +37,15 @@ export function LanguageSwitcher({ lang }: { lang: 'es' | 'en' }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => handleLanguageChange('es')} disabled={lang === 'es'}>
-          Español
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleLanguageChange('en')} disabled={lang === 'en'}>
-          English
-        </DropdownMenuItem>
+        {i18n.locales.map(locale => (
+          <DropdownMenuItem 
+            key={locale}
+            onClick={() => handleLanguageChange(locale)} 
+            disabled={lang === locale}
+          >
+            {locale === 'es' ? 'Español' : 'English'}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

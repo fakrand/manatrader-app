@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
+import { i18n } from '@/i18n-config';
 
 export default function CartPage() {
-  redirect('/es/cart');
+  redirect(`/${i18n.defaultLocale}/cart`);
 }

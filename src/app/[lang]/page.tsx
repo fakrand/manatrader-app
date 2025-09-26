@@ -3,12 +3,13 @@ import { CardGrid } from '@/components/card-grid';
 import { Filters } from '@/components/filters';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getDictionary } from '@/lib/dictionaries';
+import { Locale } from '@/i18n-config';
 
 export default async function LangHome({
   params: { lang },
   searchParams,
 }: {
-  params: { lang: 'es' | 'en' };
+  params: { lang: Locale };
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   const dict = await getDictionary(lang);

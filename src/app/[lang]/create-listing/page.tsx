@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { getDictionary } from "@/lib/dictionaries";
 import { HelpCircle, Image as ImageIcon } from "lucide-react";
+import { Locale } from "@/i18n-config";
 
-export default async function CreateListingPage({ params: { lang } }: { params: { lang: 'es' | 'en' } }) {
+export default async function CreateListingPage({ params: { lang } }: { params: { lang: Locale } }) {
     const dict = await getDictionary(lang);
     const t = dict.createListing;
     const cardSelected = true; // This would be state in a real implementation

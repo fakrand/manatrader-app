@@ -21,8 +21,9 @@ import { Logo } from './logo';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { getDictionary } from '@/lib/dictionaries';
 import { LanguageSwitcher } from './language-switcher';
+import { Locale } from '@/i18n-config';
 
-export default async function Header({ lang }: { lang: 'es' | 'en' }) {
+export default async function Header({ lang }: { lang: Locale }) {
   const userAvatar = PlaceHolderImages.find((img) => img.id === 'user_avatar_1');
   const dict = await getDictionary(lang);
   const t = dict.header;

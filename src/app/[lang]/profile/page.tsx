@@ -8,8 +8,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { getDictionary } from "@/lib/dictionaries";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Star } from "lucide-react";
+import { Locale } from "@/i18n-config";
 
-export default async function ProfilePage({ params: { lang } }: { params: { lang: 'es' | 'en' } }) {
+export default async function ProfilePage({ params: { lang } }: { params: { lang: Locale } }) {
     const dict = await getDictionary(lang);
     const t = dict.profile;
     const userAvatar = PlaceHolderImages.find((img) => img.id === 'user_avatar_1');

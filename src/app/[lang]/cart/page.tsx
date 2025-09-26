@@ -3,8 +3,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Separator } from "@/components/ui/separator";
 import { getDictionary } from "@/lib/dictionaries";
 import { ShoppingCart } from "lucide-react";
+import { Locale } from "@/i18n-config";
 
-export default async function CartPage({ params: { lang } }: { params: { lang: 'es' | 'en' } }) {
+export default async function CartPage({ params: { lang } }: { params: { lang: Locale } }) {
   const dict = await getDictionary(lang);
   const t = dict.cart;
   const isEmpty = true;

@@ -11,10 +11,11 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { getDictionary } from '@/lib/dictionaries';
+import { Locale } from '@/i18n-config';
 
 interface CardItemProps {
   listing: CardListing;
-  lang: 'es' | 'en';
+  lang: Locale;
 }
 
 export async function CardItem({ listing, lang }: CardItemProps) {
