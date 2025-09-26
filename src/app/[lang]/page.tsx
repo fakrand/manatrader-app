@@ -3,6 +3,7 @@ import { getDictionary } from '@/lib/dictionaries';
 import { Locale } from '@/i18n-config';
 import { ArrowRight, ShoppingCart, Repeat, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default async function LandingPage({
   params: { lang },
@@ -42,13 +43,15 @@ export default async function LandingPage({
                 </div>
               </div>
               <div className="flex items-center justify-center">
-                  <div className="w-[250px] h-[350px] lg:w-[300px] lg:h-[420px] bg-card rounded-lg shadow-2xl transform rotate-3 transition-transform duration-500 hover:rotate-0 hover:scale-105 flex items-center justify-center border-2 border-primary/50 p-4">
-                      <div className="text-center">
-                         <h3 className="font-headline text-lg">Black Lotus</h3>
-                         <p className="text-sm text-muted-foreground">Alpha</p>
-                         <div className="w-32 h-32 bg-muted rounded-full my-4 mx-auto animate-pulse"></div>
-                         <p className="text-xs text-muted-foreground">{t.hero.cardDescription}</p>
-                      </div>
+                  <div className="w-[250px] h-[350px] lg:w-[300px] lg:h-[420px] bg-transparent rounded-lg shadow-2xl transform rotate-3 transition-transform duration-500 hover:rotate-0 hover:scale-105 flex items-center justify-center p-4">
+                      <Image
+                        src="https://cards.scryfall.io/large/front/f/c/fce0d45c-7a4c-4088-a6d2-f447859cc8d2.jpg"
+                        alt="Blacker Lotus"
+                        width={300}
+                        height={420}
+                        className="rounded-xl shadow-lg"
+                        data-ai-hint="magic card"
+                      />
                   </div>
               </div>
             </div>
