@@ -76,11 +76,12 @@
   "createListing": {
     "title": "Crear Nueva Publicación",
     "description": "Publica tus cartas sueltas de Magic: The Gathering para venta o intercambio.",
-    "step1Title": "Paso 1: Encuentra tu carta",
-    "step1Description": "Busca en la base de datos de Scryfall para encontrar la carta exacta que quieres publicar.",
+    "step1Title": "Encuentra tu carta",
+    "step1Description": "Busca en la base de datos para encontrar la carta y edición exacta que quieres publicar.",
+    "step1SearchLabel": "Búsqueda de carta",
     "step1SearchPlaceholder": "Buscar por nombre de carta... ej., Sol Ring",
-    "step2Title": "Paso 2: Especifica los Detalles",
-    "step2Description": "Estás publicando: {cardName}",
+    "step2Title": "Detalles de la Publicación",
+    "step2Description": "Especifica la condición, precio y otros detalles de tu carta.",
     "priceLabel": "Precio (Soles Peruanos)",
     "pricePlaceholder": "ej., 25.50",
     "marketPrice": "Precio de Mercado TCGplayer: ${price}",
@@ -88,11 +89,11 @@
     "conditionLabel": "Condición",
     "selectCondition": "Selecciona la condición",
     "conditions": {
-      "NM": "Casi Nueva (NM)",
-      "LP": "Ligeramente Jugada (LP)",
-      "MP": "Moderadamente Jugada (MP)",
-      "HP": "Muy Jugada (HP)",
-      "DMG": "Dañada (DMG)"
+      "NM": "NM - Casi Nueva",
+      "LP": "LP - Ligeramente Jugada",
+      "MP": "MP - Moderadamente Jugada",
+      "HP": "HP - Muy Jugada",
+      "DMG": "DMG - Dañada"
     },
     "languageLabel": "Idioma",
     "selectLanguage": "Selecciona el idioma",

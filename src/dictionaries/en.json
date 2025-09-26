@@ -76,11 +76,12 @@
   "createListing": {
     "title": "Create a New Listing",
     "description": "List your Magic: The Gathering singles for sale or trade.",
-    "step1Title": "Step 1: Find your card",
-    "step1Description": "Search the Scryfall database to find the exact card you want to list.",
+    "step1Title": "Find your card",
+    "step1Description": "Search the database to find the exact card and version you want to list.",
+    "step1SearchLabel": "Card Search",
     "step1SearchPlaceholder": "Search by card name... e.g., Sol Ring",
-    "step2Title": "Step 2: Specify Listing Details",
-    "step2Description": "You are listing: {cardName}",
+    "step2Title": "Listing Details",
+    "step2Description": "Specify the condition, price, and other details for your card.",
     "priceLabel": "Price (Peruvian Soles)",
     "pricePlaceholder": "e.g., 25.50",
     "marketPrice": "TCGplayer Market Price: ${price}",
@@ -88,11 +89,11 @@
     "conditionLabel": "Condition",
     "selectCondition": "Select card condition",
     "conditions": {
-      "NM": "Near Mint (NM)",
-      "LP": "Lightly Played (LP)",
-      "MP": "Moderately Played (MP)",
-      "HP": "Heavily Played (HP)",
-      "DMG": "Damaged (DMG)"
+      "NM": "NM - Near Mint",
+      "LP": "LP - Lightly Played",
+      "MP": "MP - Moderately Played",
+      "HP": "HP - Heavily Played",
+      "DMG": "DMG - Damaged"
     },
     "languageLabel": "Language",
     "selectLanguage": "Select language",
