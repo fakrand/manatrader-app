@@ -125,14 +125,31 @@
     "averageRating": "({rating} de Calificación Promedio)",
     "tierTooltip": "Plan {tier}: {limit} publicaciones activas máx.",
     "myListings": "Mis Publicaciones",
-    "myListingsDescription": "Gestiona tus publicaciones activas de compra y venta.",
-    "noActiveListings": "Aún no hay publicaciones activas.",
+    "myListingsDescription": "Administra tus publicaciones activas de compra y venta.",
+    "noActiveListings": "Aún no tienes publicaciones activas.",
     "reputationAndReviews": "Reputación y Reseñas",
     "reviewsDescription": "Reseñas de tus transacciones completadas.",
-    "noReviews": "Aún no hay reseñas."
+    "noReviews": "Aún no tienes reseñas."
+  },
+  "auth": {
+    "title": "Bienvenido a ManaTrader",
+    "description": "Inicia sesión o crea una cuenta para empezar a intercambiar.",
+    "emailTab": "Correo",
+    "phoneTab": "Teléfono",
+    "emailLabel": "Correo Electrónico",
+    "passwordLabel": "Contraseña",
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "orContinueWith": "O continuar con",
+    "google": "Continuar con Google",
+    "phoneLabel": "Número de Teléfono",
+    "sendCode": "Enviar Código",
+    "codeLabel": "Código de Verificación",
+    "verifyCode": "Verificar Código",
+    "error": "Error de Autenticación"
   },
   "metadata": {
-    "title": "ManaTrader",
-    "description": "El mercado principal de cartas sueltas de Magic: The Gathering en Perú."
+    "title": "ManaTrader - Mercado de Magic: The Gathering Perú",
+    "description": "Compra, vende e intercambia cartas de Magic: The Gathering en Perú. La comunidad más grande de jugadores y tiendas."
   }
 }

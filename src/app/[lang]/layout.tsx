@@ -54,6 +54,3 @@ export default function RootLayout({
   );
 }
 
-export async function generateStaticParams() {
-  return i18n.locales.map((locale) => ({ lang: locale }));
-}

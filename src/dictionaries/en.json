@@ -131,8 +131,25 @@
     "reviewsDescription": "Reviews from your completed transactions.",
     "noReviews": "No reviews yet."
   },
+  "auth": {
+    "title": "Welcome to ManaTrader",
+    "description": "Log in or create an account to start trading.",
+    "emailTab": "Email",
+    "phoneTab": "Phone",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "login": "Log In",
+    "signup": "Sign Up",
+    "orContinueWith": "Or continue with",
+    "google": "Continue with Google",
+    "phoneLabel": "Phone Number",
+    "sendCode": "Send Code",
+    "codeLabel": "Verification Code",
+    "verifyCode": "Verify Code",
+    "error": "Authentication Error"
+  },
   "metadata": {
-    "title": "ManaTrader",
-    "description": "The premier marketplace for Magic: The Gathering singles in Peru."
+    "title": "ManaTrader - Magic: The Gathering Marketplace Peru",
+    "description": "Buy, sell, and trade Magic: The Gathering cards in Peru. The largest community of players and stores."
   }
 }
