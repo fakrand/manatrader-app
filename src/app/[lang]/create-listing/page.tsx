@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useMemo, useRef, useEffect, Suspense } from 'react';
@@ -11,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { HelpCircle, Image as ImageIcon } from "lucide-react";
 import { Locale } from "@/i18n-config";
 import { cn } from '@/lib/utils';
-import type { getDictionary } from '@/lib/dictionaries';
 
 // This would ideally come from a comprehensive database fetched from an API
 const MOCK_CARD_NAMES = [
@@ -29,7 +29,7 @@ const MOCK_CARD_NAMES = [
 
 
 type CreateListingPageProps = {
-    t: Awaited<ReturnType<typeof getDictionary>>['createListing'];
+    t: any;
     lang: Locale;
 };
 

@@ -25,9 +25,8 @@ import { Logo } from './logo';
 import { LanguageSwitcher } from './language-switcher';
 import { Locale } from '@/i18n-config';
 import { useAuth } from '@/hooks/use-auth';
-import type { getDictionary } from '@/lib/dictionaries';
 
-export function HeaderClient({ lang, dict }: { lang: Locale, dict: Awaited<ReturnType<typeof getDictionary>> }) {
+export function HeaderClient({ lang, dict }: { lang: Locale, dict: any }) {
   const { user, signOut, loading } = useAuth();
   const t = dict.header;
   const userAvatar = user?.photoURL;
