@@ -13,8 +13,10 @@ export async function CardGrid({
 }) {
   const dict = await getDictionary(lang);
   const t = dict.home.cardGrid;
-  // Simulate network latency
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  
+  // In a real app, you would fetch data from a database here
+  // based on the searchParams.
+  const listings = cardListings;
 
   const query = searchParams?.query as string | undefined;
   const conditions = (searchParams?.condition as string | undefined)?.split(',');
@@ -22,7 +24,7 @@ export async function CardGrid({
   const colors = (searchParams?.color as string | undefined)?.split(',');
   const maxPrice = searchParams?.price ? Number(searchParams.price) : undefined;
 
-  const filteredListings = cardListings.filter((listing) => {
+  const filteredListings = listings.filter((listing) => {
     if (query && !listing.name.toLowerCase().includes(query.toLowerCase())) {
       return false;
     }

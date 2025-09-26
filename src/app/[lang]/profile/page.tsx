@@ -14,17 +14,17 @@ export default async function ProfilePage({ params: { lang } }: { params: { lang
     const dict = await getDictionary(lang);
     const t = dict.profile;
     const userAvatar = PlaceHolderImages.find((img) => img.id === 'user_avatar_1');
-    const listingsUsed = 8;
-    const listingLimit = 20;
+    const listingsUsed = 0; // Placeholder
+    const listingLimit = 20; // Placeholder
+    const tier = 'Common'; // Placeholder
+    const averageRating = 0; // Placeholder
 
-    const tierColors = {
+    const tierColors: { [key: string]: string } = {
         'Common': 'bg-rarity-common text-black',
         'Uncommon': 'bg-rarity-uncommon text-black',
         'Rare': 'bg-rarity-rare text-black',
         'Mythic': 'bg-rarity-mythic text-white',
     };
-    const tier = 'Common';
-    const averageRating = 4.1;
     
     return (
         <div className="container mx-auto px-4 py-8">
@@ -62,10 +62,10 @@ export default async function ProfilePage({ params: { lang } }: { params: { lang
                         <Separator />
                         <div className="flex items-center justify-center gap-2">
                              <div className="flex items-center text-yellow-400">
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" />
+                                <Star className="w-5 h-5" />
+                                <Star className="w-5 h-5" />
+                                <Star className="w-5 h-5" />
+                                <Star className="w-5 h-5" />
                                 <Star className="w-5 h-5" />
                             </div>
                             <span className="text-muted-foreground">{t.averageRating.replace('{rating}', String(averageRating))}</span>

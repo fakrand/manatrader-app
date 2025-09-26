@@ -27,6 +27,7 @@ export default async function Header({ lang }: { lang: Locale }) {
   const userAvatar = PlaceHolderImages.find((img) => img.id === 'user_avatar_1');
   const dict = await getDictionary(lang);
   const t = dict.header;
+  const isLoggedIn = true; // Placeholder for user auth status
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -65,56 +66,60 @@ export default async function Header({ lang }: { lang: Locale }) {
                 <span className="sr-only">{t.shoppingCart}</span>
               </Link>
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="User avatar" />}
-                    <AvatarFallback>
-                      <CircleUserRound />
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">PlayerOne</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      player.one@email.com
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild>
-                    <Link href={`/${lang}/profile`}>
-                      <CircleUserRound className="mr-2 h-4 w-4" />
-                      <span>{t.profile}</span>
-                    </Link>
-                  </DropdownMenuItem>
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="User avatar" />}
+                      <AvatarFallback>
+                        <CircleUserRound />
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">PlayerOne</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        player.one@email.com
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/${lang}/profile`}>
+                        <CircleUserRound className="mr-2 h-4 w-4" />
+                        <span>{t.profile}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Library className="mr-2 h-4 w-4" />
+                      <span>{t.myCollection}</span>
+                    </DropdownMenuItem>
+                     <DropdownMenuItem asChild>
+                      <Link href={`/${lang}/create-listing`}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        <span>{t.newListing}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <Library className="mr-2 h-4 w-4" />
-                    <span>{t.myCollection}</span>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>{t.settings}</span>
                   </DropdownMenuItem>
-                   <DropdownMenuItem asChild>
-                    <Link href={`/${lang}/create-listing`}>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      <span>{t.newListing}</span>
-                    </Link>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <span>{t.logout}</span>
                   </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>{t.settings}</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <span>{t.logout}</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+               <Button variant="secondary">{t.login}</Button>
+            )}
           </nav>
         </div>
       </div>
