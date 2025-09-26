@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { Locale } from '@/i18n-config';
+import { cn } from '@/lib/utils';
 
 type AuthFormProps = {
   t: any;
@@ -48,11 +50,17 @@ declare global {
     }
 }
 
+const emailDomains = ['@gmail.com', '@outlook.com', '@yahoo.com'];
+
 export function AuthForm({ t, lang }: AuthFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [phoneStep, setPhoneStep] = useState<'phone' | 'code'>('phone');
+  
+  const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const suggestionsRef = useRef<HTMLUListElement>(null);
   
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
@@ -126,12 +134,57 @@ export function AuthForm({ t, lang }: AuthFormProps) {
       try {
         await window.confirmationResult?.confirm(data.code);
         router.push(`/${lang}/profile`);
-      } catch (error: any) {
+      } catch (error: any)         {
          toast({ variant: 'destructive', title: t.error, description: error.message });
       } finally {
           setIsSubmitting(false);
       }
   }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    emailForm.setValue('email', value);
+    if (value && !value.includes('@')) {
+      setEmailSuggestions(emailDomains.map(domain => `${value}${domain}`));
+    } else {
+      setEmailSuggestions([]);
+    }
+    setActiveSuggestion(-1);
+  };
+
+  const handleEmailKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (emailSuggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveSuggestion(prev => (prev < emailSuggestions.length - 1 ? prev + 1 : prev));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveSuggestion(prev => (prev > 0 ? prev - 1 : prev));
+      } else if (e.key === 'Enter' && activeSuggestion > -1) {
+        e.preventDefault();
+        handleSuggestionClick(emailSuggestions[activeSuggestion]);
+      } else if (e.key === 'Escape') {
+        setEmailSuggestions([]);
+      }
+    }
+  };
+  
+  const handleSuggestionClick = (suggestion: string) => {
+    emailForm.setValue('email', suggestion);
+    setEmailSuggestions([]);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setEmailSuggestions([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [suggestionsRef]);
 
   return (
     <Card className="w-full max-w-md">
@@ -156,7 +209,31 @@ export function AuthForm({ t, lang }: AuthFormProps) {
                     <FormItem>
                       <FormLabel>{t.emailLabel}</FormLabel>
                       <FormControl>
-                        <Input placeholder="name@example.com" {...field} />
+                        <div className="relative">
+                          <Input 
+                            placeholder="name@example.com" 
+                            {...field} 
+                            onChange={handleEmailChange}
+                            onKeyDown={handleEmailKeyDown}
+                            autoComplete="off"
+                          />
+                          {emailSuggestions.length > 0 && (
+                            <ul ref={suggestionsRef} className="absolute z-10 w-full bg-card border border-border rounded-md mt-1 shadow-lg">
+                              {emailSuggestions.map((suggestion, index) => (
+                                <li
+                                  key={suggestion}
+                                  className={cn(
+                                    "px-3 py-2 cursor-pointer hover:bg-muted",
+                                    index === activeSuggestion && "bg-muted"
+                                  )}
+                                  onClick={() => handleSuggestionClick(suggestion)}
+                                >
+                                  {suggestion}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -246,3 +323,5 @@ export function AuthForm({ t, lang }: AuthFormProps) {
     </Card>
   );
 }
+
+    
