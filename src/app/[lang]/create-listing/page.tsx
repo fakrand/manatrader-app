@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { HelpCircle, Image as ImageIcon } from "lucide-react";
 import { Locale } from "@/i18n-config";
 import { cn } from '@/lib/utils';
+import { getDictionary } from '@/lib/dictionaries';
+
 
 // This would ideally come from a comprehensive database fetched from an API
 const MOCK_CARD_NAMES = [
@@ -255,7 +257,6 @@ function CreateListingClientPage({ t, lang }: CreateListingPageProps) {
 
 // This is the new async Server Component to fetch the dictionary
 export default async function CreateListingPage({ params: { lang } }: { params: { lang: Locale } }) {
-    const { getDictionary } = await import('@/lib/dictionaries');
     const dict = await getDictionary(lang);
     const t = dict.createListing;
     
@@ -266,7 +267,5 @@ export default async function CreateListingPage({ params: { lang } }: { params: 
         </Suspense>
     );
 }
-
-    
 
     

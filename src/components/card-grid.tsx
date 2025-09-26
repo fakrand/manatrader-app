@@ -1,3 +1,4 @@
+
 import { getDictionary } from '@/lib/dictionaries';
 import { getCardListings } from '@/lib/data';
 import { CardItem } from './card-item';
@@ -13,6 +14,7 @@ export async function CardGrid({
 }) {
   const dict = await getDictionary(lang);
   const t = dict.home.cardGrid;
+  const cardItemT = dict.home.cardItem;
   
   // Fetch data from Firestore instead of using local data.
   const listings = await getCardListings();
@@ -61,8 +63,10 @@ export async function CardGrid({
       "xl:grid-cols-3"
     )}>
       {filteredListings.map((listing) => (
-        <CardItem key={listing.id} listing={listing} lang={lang} />
+        <CardItem key={listing.id} listing={listing} lang={lang} t={cardItemT} />
       ))}
     </div>
   );
 }
+
+    

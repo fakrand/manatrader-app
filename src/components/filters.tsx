@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useTransition, useCallback } from 'react';
@@ -19,16 +20,13 @@ import { Button } from './ui/button';
 import { ManaSymbol } from './mana-symbol';
 import { cn } from '@/lib/utils';
 import { fetchSmartFilters } from '@/app/actions';
-import { getDictionary } from '@/lib/dictionaries';
 import { Locale } from '@/i18n-config';
 
 const conditions = ['NM', 'LP', 'MP', 'HP', 'DMG'];
 const languages = ['English', 'Spanish', 'Japanese'];
 const colors: ('W' | 'U' | 'B' | 'R' | 'G')[] = ['W', 'U', 'B', 'R', 'G'];
 
-type Dictionary = Awaited<ReturnType<typeof getDictionary>>['home']['filters'];
-
-export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary }) {
+export function Filters({ lang, dict }: { lang: Locale, dict: any }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -191,3 +189,5 @@ export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary }) {
     </div>
   );
 }
+
+    

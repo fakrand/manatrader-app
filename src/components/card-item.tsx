@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { Star, ShoppingCart } from 'lucide-react';
 
@@ -10,17 +11,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { getDictionary } from '@/lib/dictionaries';
 import { Locale } from '@/i18n-config';
 
 interface CardItemProps {
   listing: CardListing;
   lang: Locale;
+  t: any;
 }
 
-export async function CardItem({ listing, lang }: CardItemProps) {
-  const dict = await getDictionary(lang);
-  const t = dict.home.cardItem;
+export function CardItem({ listing, lang, t }: CardItemProps) {
   return (
     <div className="group relative">
       <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-card shadow-lg group-hover:shadow-primary/50 transition-shadow">
@@ -82,3 +81,5 @@ export async function CardItem({ listing, lang }: CardItemProps) {
     </div>
   );
 }
+
+    
