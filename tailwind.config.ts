@@ -1,5 +1,7 @@
 import type {Config} from 'tailwindcss';
 
+const { fontFamily } = require("tailwindcss/defaultTheme")
+
 export default {
   darkMode: ['class'],
   content: [
@@ -8,11 +10,18 @@ export default {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
-        code: ['monospace'],
+        sans: ["var(--font-inter)", ...fontFamily.sans],
+        headline: ["var(--font-space-grotesk)", ...fontFamily.sans],
+        pixel: ["var(--font-press-start-2p)", "cursive"],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -65,6 +74,12 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        rarity: {
+          common: 'hsl(var(--rarity-common))',
+          uncommon: 'hsl(var(--rarity-uncommon))',
+          rare: 'hsl(var(--rarity-rare))',
+          mythic: 'hsl(var(--rarity-mythic))',
+        }
       },
       borderRadius: {
         lg: 'var(--radius)',
