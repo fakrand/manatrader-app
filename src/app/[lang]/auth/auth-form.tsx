@@ -77,6 +77,29 @@ export function AuthForm({ t, lang }: AuthFormProps) {
     defaultValues: { code: '' },
   });
 
+  const handleAuthError = (error: any) => {
+    let description = error.message; // Default message
+    if (lang === 'es') {
+        switch (error.code) {
+            case 'auth/invalid-credential':
+                description = 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.';
+                break;
+            case 'auth/email-already-in-use':
+                description = 'Este correo electrónico ya está en uso. Por favor, intenta con otro.';
+                break;
+            case 'auth/weak-password':
+                description = 'La contraseña es demasiado débil. Debe tener al menos 6 caracteres.';
+                break;
+            case 'auth/invalid-email':
+                description = 'El formato del correo electrónico no es válido.';
+                break;
+            default:
+                description = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
+        }
+    }
+    toast({ variant: 'destructive', title: t.error, description });
+  };
+
   const handleAuth = async (action: 'signup' | 'login', data: z.infer<typeof emailSchema>) => {
     setIsSubmitting(true);
     try {
@@ -87,7 +110,7 @@ export function AuthForm({ t, lang }: AuthFormProps) {
       }
       router.push(`/${lang}/profile`);
     } catch (error: any) {
-      toast({ variant: 'destructive', title: t.error, description: error.message });
+      handleAuthError(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -99,7 +122,7 @@ export function AuthForm({ t, lang }: AuthFormProps) {
       await signInWithPopup(auth, provider);
       router.push(`/${lang}/profile`);
     } catch (error: any) {
-      toast({ variant: 'destructive', title: t.error, description: error.message });
+      handleAuthError(error);
     }
   };
 
@@ -123,7 +146,7 @@ export function AuthForm({ t, lang }: AuthFormProps) {
       window.confirmationResult = confirmationResult;
       setPhoneStep('code');
     } catch(error: any) {
-       toast({ variant: 'destructive', title: t.error, description: error.message });
+       handleAuthError(error);
     } finally {
         setIsSubmitting(false);
     }
@@ -134,8 +157,8 @@ export function AuthForm({ t, lang }: AuthFormProps) {
       try {
         await window.confirmationResult?.confirm(data.code);
         router.push(`/${lang}/profile`);
-      } catch (error: any)         {
-         toast({ variant: 'destructive', title: t.error, description: error.message });
+      } catch (error: any) {
+         handleAuthError(error);
       } finally {
           setIsSubmitting(false);
       }
@@ -335,5 +358,3 @@ export function AuthForm({ t, lang }: AuthFormProps) {
     </Card>
   );
 }
-
-    
