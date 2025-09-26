@@ -7,7 +7,8 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 async function getRandomCard() {
-  const response = await fetch('https://api.scryfall.com/cards/random?q=set%3Aleb');
+  // Add a random parameter to the URL to bypass Next.js fetch caching
+  const response = await fetch(`https://api.scryfall.com/cards/random?q=set%3Aleb&_=${Math.random()}`);
   const card = await response.json();
   return {
     imageUrl: card.image_uris?.large || "https://cards.scryfall.io/large/front/f/c/fce0d45c-7a4c-4088-a6d2-f447859cc8d2.jpg",
