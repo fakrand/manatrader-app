@@ -358,5 +358,3 @@ export function AuthForm({ t, lang }: AuthFormProps) {
     </Card>
   );
 }
-
-    
