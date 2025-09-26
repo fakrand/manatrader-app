@@ -50,7 +50,7 @@ declare global {
     }
 }
 
-const emailDomains = ['@gmail.com', '@outlook.com', '@yahoo.com'];
+const emailDomains = ['gmail.com', 'outlook.com', 'yahoo.com'];
 
 export function AuthForm({ t, lang }: AuthFormProps) {
   const { toast } = useToast();
@@ -144,8 +144,20 @@ export function AuthForm({ t, lang }: AuthFormProps) {
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     emailForm.setValue('email', value);
-    if (value && !value.includes('@')) {
-      setEmailSuggestions(emailDomains.map(domain => `${value}${domain}`));
+
+    if (value.includes('@')) {
+      const atIndex = value.indexOf('@');
+      const username = value.substring(0, atIndex);
+      const domainPart = value.substring(atIndex + 1);
+      
+      const filteredDomains = emailDomains.filter(domain => domain.startsWith(domainPart));
+
+      if (filteredDomains.length > 0 && domainPart.length < filteredDomains[0].length) {
+         setEmailSuggestions(filteredDomains.map(domain => `${username}@${domain}`));
+      } else {
+         setEmailSuggestions([]);
+      }
+
     } else {
       setEmailSuggestions([]);
     }
