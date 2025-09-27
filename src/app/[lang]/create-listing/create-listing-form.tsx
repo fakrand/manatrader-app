@@ -113,41 +113,36 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         }
     }, [selectedEditionId, cardEditions]);
     
-useEffect(() => {
-    const fetchLanguagesForEdition = async () => {
-        if (selectedEditionId && selectedCardName) {
-            const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
-            if (selectedEdition) {
-                try {
-                    const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(selectedCardName)}" set:${selectedEdition.set}&include_multilingual=true`);
-                    const data = await response.json();
-                    
-                    if (data.data) {
-                        const editionPrints = data.data.filter((card: any) => !card.digital);
-                        const editionLanguages = [...new Set(editionPrints.map((card: any) => card.lang))];
-                        setAvailableLanguages(editionLanguages);
+    useEffect(() => {
+        const fetchLanguagesForEdition = async () => {
+            if (selectedEditionId && selectedCardName) {
+                const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
+                if (selectedEdition) {
+                    try {
+                        const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(selectedCardName)}" set:${selectedEdition.set}&include_multilingual=true`);
+                        const data = await response.json();
                         
-                        // Si el idioma actual no está disponible en esta edición, seleccionar el primero disponible
-                        if (!editionLanguages.includes(selectedLanguage) && editionLanguages.length > 0) {
-                            const defaultLang = editionLanguages.includes(lang) ? lang : editionLanguages[0];
+                        if (data.data) {
+                            const editionPrints = data.data.filter((card: any) => !card.digital);
+                            const editionLanguages = [...new Set(editionPrints.map((card: any) => card.lang))];
+                            setAvailableLanguages(editionLanguages);
+                            
+                            // Seleccionar inglés por defecto si está disponible
+                            const defaultLang = editionLanguages.includes('en') ? 'en' : 
+                                              (editionLanguages.includes(lang) ? lang : editionLanguages[0]);
                             setSelectedLanguage(defaultLang);
                         }
-                    }
-                } catch (error) {
-                    console.error('Error fetching languages for edition:', error);
-                    // Mantener el idioma actual como fallback
-                    const currentEdition = cardEditions.find(e => e.id === selectedEditionId);
-                    if (currentEdition) {
-                        setAvailableLanguages([currentEdition.lang]);
-                        setSelectedLanguage(currentEdition.lang);
+                    } catch (error) {
+                        console.error('Error fetching languages for edition:', error);
+                        setAvailableLanguages(['en']);
+                        setSelectedLanguage('en');
                     }
                 }
             }
-        }
-    };
+        };
 
-    fetchLanguagesForEdition();
-}, [selectedEditionId, selectedCardName, lang, cardEditions, selectedLanguage]);
+        fetchLanguagesForEdition();
+    }, [selectedEditionId, selectedCardName, lang]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -224,9 +219,18 @@ useEffect(() => {
                 setSelectedFinish(allFinishes.includes('nonfoil') ? 'nonfoil' : allFinishes[0]);
             }
             
-            allPrints.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
+            // Agrupar por set para mostrar solo ediciones únicas
+            const uniqueEditions = allPrints.reduce((acc, print) => {
+                if (!acc.find(p => p.set === print.set)) {
+                    // Tomar la versión en inglés si está disponible, sino la primera
+                    const englishVersion = allPrints.find(p => p.set === print.set && p.lang === 'en');
+                    acc.push(englishVersion || print);
+                }
+                return acc;
+            }, [] as ScryfallCard[]);
 
-            setCardEditions(allPrints);
+            uniqueEditions.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
+            setCardEditions(uniqueEditions);
 
         } catch (error) {
             console.error(error);
@@ -466,3 +470,4 @@ useEffect(() => {
     
 
     
+
