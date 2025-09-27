@@ -147,16 +147,6 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             
             const allPrints: ScryfallCard[] = data.data.filter((card: any) => !card.digital);
             
-            // Sort by release date
-            allPrints.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
-
-            const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], current) => {
-                if (!acc.some(item => item.set === current.set)) {
-                    acc.push(current);
-                }
-                return acc;
-            }, []);
-
             const uniqueLanguages = [...new Set(allPrints.map(card => card.lang))];
             setAvailableLanguages(uniqueLanguages);
             if (uniqueLanguages.length > 0) {
@@ -168,6 +158,17 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             if (allFinishes.length > 0) {
                 setSelectedFinish(allFinishes.includes('nonfoil') ? 'nonfoil' : allFinishes[0]);
             }
+            
+            // Sort by release date
+            allPrints.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
+
+            const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], current) => {
+                if (!acc.some(item => item.set === current.set)) {
+                    acc.push(current);
+                }
+                return acc;
+            }, []);
+
 
             setCardEditions(uniqueEditions);
 
@@ -234,7 +235,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                     </ul>
                                 )}
                             </div>
-                            <div className="space-y-2">
+                             <div className="space-y-2">
                                 <Label htmlFor="edition">{t.editionLabel}</Label>
                                 <Select
                                     disabled={!selectedCardName || isFetchingEditions || cardEditions.length === 0}
@@ -258,7 +259,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div className="grid grid-cols-2 gap-6">
+                           <div className="grid grid-cols-2 gap-6">
                                <div className="space-y-2">
                                     <Label htmlFor="condition">{t.conditionLabel}</Label>
                                     <Select>
