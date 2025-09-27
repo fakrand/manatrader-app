@@ -110,7 +110,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         setSelectedEditionId('');
         
         try {
-            const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=!%22${encodeURIComponent(suggestion)}%22`);
+            const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=%21"${encodeURIComponent(suggestion)}"`);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch card editions');
@@ -217,6 +217,27 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                     </SelectContent>
                                 </Select>
                             </div>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="quantity">{t.quantityLabel}</Label>
+                                    <Input id="quantity" type="number" defaultValue="1" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="condition">{t.conditionLabel}</Label>
+                                    <Select>
+                                        <SelectTrigger id="condition">
+                                            <SelectValue placeholder={t.selectCondition} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="NM">{t.conditions.NM}</SelectItem>
+                                            <SelectItem value="LP">{t.conditions.LP}</SelectItem>
+                                            <SelectItem value="MP">{t.conditions.MP}</SelectItem>
+                                            <SelectItem value="HP">{t.conditions.HP}</SelectItem>
+                                            <SelectItem value="DMG">{t.conditions.DMG}</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
                         </div>
                          <div className="md:col-span-1 flex items-center justify-center">
                            <div className="aspect-[3/4] w-full max-w-[250px] relative">
@@ -249,25 +270,6 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                             <p className="text-xs text-muted-foreground flex items-center gap-1">
                                 <HelpCircle className="w-3 h-3"/> {t.marketPrice.replace('{price}', '6.78')}
                             </p>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="quantity">{t.quantityLabel}</Label>
-                            <Input id="quantity" type="number" defaultValue="1" />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="condition">{t.conditionLabel}</Label>
-                            <Select>
-                                <SelectTrigger id="condition">
-                                    <SelectValue placeholder={t.selectCondition} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="NM">{t.conditions.NM}</SelectItem>
-                                    <SelectItem value="LP">{t.conditions.LP}</SelectItem>
-                                    <SelectItem value="MP">{t.conditions.MP}</SelectItem>
-                                    <SelectItem value="HP">{t.conditions.HP}</SelectItem>
-                                    <SelectItem value="DMG">{t.conditions.DMG}</SelectItem>
-                                </SelectContent>
-                            </Select>
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="language">{t.languageLabel}</Label>
