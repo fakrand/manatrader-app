@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import { Star, ShoppingCart } from 'lucide-react';
 
-import type { CardListing } from '@/lib/definitions';
+import type { CardListing, Dictionary } from '@/lib/definitions';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import {
@@ -16,7 +16,7 @@ import { Locale } from '@/i18n-config';
 interface CardItemProps {
   listing: CardListing;
   lang: Locale;
-  t: any;
+  t: Dictionary['home']['cardItem'];
 }
 
 export function CardItem({ listing, lang, t }: CardItemProps) {
@@ -81,5 +81,3 @@ export function CardItem({ listing, lang, t }: CardItemProps) {
     </div>
   );
 }
-
-    

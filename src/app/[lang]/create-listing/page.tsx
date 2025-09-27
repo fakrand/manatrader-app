@@ -29,13 +29,7 @@ const MOCK_CARD_NAMES = [
     "Wrath of God"
 ];
 
-
-type CreateListingClientPageProps = {
-    t: Dictionary['createListing'];
-    lang: Locale;
-};
-
-function CreateListingClientPage({ t, lang }: CreateListingClientPageProps) {
+function CreateListingClientPage({ t, lang }: { t: Dictionary['createListing'], lang: Locale }) {
     const listingLimitReached = false;
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -253,7 +247,6 @@ function CreateListingClientPage({ t, lang }: CreateListingClientPageProps) {
         </div>
     );
 }
-
 
 // This is the new async Server Component to fetch the dictionary
 export default async function CreateListingPage({ params: { lang } }: { params: { lang: Locale } }) {
