@@ -1,7 +1,16 @@
 "use server";
 
+import { smartFilterSuggestionsFlow } from "@/ai/flows/smart-filter-suggestions";
+
 export async function fetchSmartFilters(query: string): Promise<string[]> {
-  // Temporarily disabled to prevent build errors.
-  // This function was causing a "server-only" module to be included in the client bundle.
-  return [];
+  if (!query) {
+    return [];
+  }
+  try {
+    const suggestions = await smartFilterSuggestionsFlow({ query });
+    return suggestions.suggestedFilters || [];
+  } catch (error) {
+    console.error("Error fetching smart filters:", error);
+    return [];
+  }
 }
