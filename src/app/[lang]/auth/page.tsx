@@ -15,3 +15,5 @@ export default async function AuthPage({ params: { lang } }: { params: { lang: L
         </AuthLayout>
     );
 }
+
+    

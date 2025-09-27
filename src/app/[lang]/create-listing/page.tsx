@@ -30,12 +30,12 @@ const MOCK_CARD_NAMES = [
 ];
 
 
-type CreateListingPageProps = {
+type CreateListingClientPageProps = {
     t: any;
     lang: Locale;
 };
 
-function CreateListingClientPage({ t, lang }: CreateListingPageProps) {
+function CreateListingClientPage({ t, lang }: CreateListingClientPageProps) {
     const listingLimitReached = false;
 
     const [searchQuery, setSearchQuery] = useState('');
