@@ -1,3 +1,4 @@
+
 import { getDictionary } from '@/lib/dictionaries';
 import { Locale } from '@/i18n-config';
 import { AuthForm } from './auth-form';

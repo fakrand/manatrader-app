@@ -1,5 +1,4 @@
 
-
 import { getDictionary } from '@/lib/dictionaries';
 import { getCardListings } from '@/lib/data';
 import { CardItem } from './card-item';

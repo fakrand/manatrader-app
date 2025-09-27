@@ -191,5 +191,3 @@ export function Filters({ lang, dict }: { lang: Locale, dict: any }) {
 }
 
     
-
-    

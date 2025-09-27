@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useMemo, useRef, useEffect, Suspense } from 'react';
@@ -31,14 +30,14 @@ const MOCK_CARD_NAMES = [
 
 
 type CreateListingClientPageProps = {
-    t: any;
+    t: any; // Using 'any' to avoid server-only import issues in client component
     lang: Locale;
 };
 
 function CreateListingClientPage({ t, lang }: CreateListingClientPageProps) {
     const listingLimitReached = false;
 
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery]_useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [activeSuggestion, setActiveSuggestion] = useState(-1);
     const [selectedCard, setSelectedCard] = useState<string | null>(null);
