@@ -113,6 +113,35 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         }
     }, [selectedEditionId, cardEditions]);
     
+useEffect(() => {
+    const fetchLanguagesForEdition = async () => {
+        if (selectedEditionId && selectedCardName) {
+            const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
+            if (selectedEdition) {
+                try {
+                    const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(selectedCardName)}" set:${selectedEdition.set}`);
+                    const data = await response.json();
+                    
+                    if (data.data) {
+                        const editionPrints = data.data.filter((card: any) => !card.digital);
+                        const editionLanguages = [...new Set(editionPrints.map((card: any) => card.lang))];
+                        setAvailableLanguages(editionLanguages);
+                        
+                        // Si el idioma actual no está disponible en esta edición, seleccionar el primero disponible
+                        if (!editionLanguages.includes(selectedLanguage) && editionLanguages.length > 0) {
+                            const defaultLang = editionLanguages.includes(lang) ? lang : editionLanguages[0];
+                            setSelectedLanguage(defaultLang);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching languages for edition:', error);
+                }
+            }
+        }
+    };
+
+    fetchLanguagesForEdition();
+}, [selectedEditionId, selectedCardName, lang, selectedLanguage, cardEditions]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -423,4 +452,5 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     
 
     
+
 
