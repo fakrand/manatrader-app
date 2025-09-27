@@ -101,6 +101,15 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         setSearchQuery(value);
         if (selectedCardName && value !== selectedCardName) {
             setSelectedCardName(null);
+            // Reset dependent fields when the user starts typing a new query
+            setCardEditions([]);
+            setSelectedEditionId('');
+            setAvailableLanguages([]);
+            setSelectedLanguage('');
+            setAvailableFinishes([]);
+            setSelectedFinish('');
+            setMarketPrice(null);
+            setSelectedCardImage('/card-back.png');
         }
         setActiveSuggestion(-1);
     };
@@ -162,11 +171,10 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                 setSelectedFinish(allFinishes.includes('nonfoil') ? 'nonfoil' : allFinishes[0]);
             }
             
-             // Sort by release date DESC
             allPrints.sort((a, b) => new Date(a.released_at).getTime() - new Date(b.released_at).getTime());
 
 
-            // Reduce to unique sets, keeping the first one found (which will be the most recent print in that set)
+            // Reduce to unique sets, keeping the first one found
             const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], current) => {
                 if (!acc.some(item => item.set === current.set)) {
                     acc.push(current);
@@ -263,7 +271,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                     </SelectContent>
                                 </Select>
                             </div>
-                           <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="condition">{t.conditionLabel}</Label>
                                     <Select>
@@ -397,4 +405,3 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
 
     
     
-
