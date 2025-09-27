@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,7 +53,6 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
 
   const [selectedCardName, setSelectedCardName] = useState<string | null>(null);
-  const [cardEditions, setCardEditions] = useState<ScryfallCard[]>([]);
   const [allCardPrints, setAllCardPrints] = useState<ScryfallCard[]>([]);
   const [isFetchingEditions, setIsFetchingEditions] = useState(false);
   const [selectedEditionId, setSelectedEditionId] = useState<string>('');
@@ -87,58 +86,73 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     fetchSuggestions();
   }, [debouncedSearchQuery, selectedCardName]);
 
-  /* ---------- Actualizar imagen/precio/idiomas cuando cambia la edición ---------- */
+  const uniqueEditions = useMemo(() => {
+    if (allCardPrints.length === 0) return [];
+    const editions = allCardPrints.reduce((acc: ScryfallCard[], print) => {
+      if (!acc.find(p => p.set === print.set)) {
+        const englishVersion = allCardPrints.find(p => p.set === print.set && p.lang === 'en');
+        acc.push(englishVersion || print);
+      }
+      return acc;
+    }, []);
+    return editions.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
+  }, [allCardPrints]);
+
+  /* ---------- Actualizar imagen/precio/idiomas/finishes cuando cambia la edición ---------- */
   useEffect(() => {
     if (!selectedEditionId || allCardPrints.length === 0) return;
-    
-    const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
-    if (selectedEdition) {
-        // Actualizar imagen y precio base de la edición seleccionada
-        if (selectedEdition.image_uris) setSelectedCardImage(selectedEdition.image_uris.large);
-        const price = selectedEdition.prices?.usd || selectedEdition.prices?.usd_foil || selectedEdition.prices?.usd_etched;
-        setMarketPrice(price || null);
 
-        // Actualizar idiomas disponibles para esa edición
-        const editionPrints = allCardPrints.filter(card => card.set === selectedEdition.set);
-        const editionLanguages = Array.from(new Set(editionPrints.map(card => card.lang)));
-        setAvailableLanguages(editionLanguages);
+    const selectedPrint = allCardPrints.find(e => e.id === selectedEditionId);
+    if (selectedPrint) {
+      // Imagen y precio
+      if (selectedPrint.image_uris) setSelectedCardImage(selectedPrint.image_uris.large);
+      const price = selectedPrint.prices?.usd || selectedPrint.prices?.usd_foil || selectedPrint.prices?.usd_etched;
+      setMarketPrice(price || null);
 
-        // Si el idioma actual no está disponible o no hay ninguno, seleccionar uno por defecto
-        if (editionLanguages.length > 0 && !editionLanguages.includes(selectedLanguage)) {
-          const defaultLang = editionLanguages.includes('en') ? 'en' : (editionLanguages.includes(lang) ? lang : editionLanguages[0]);
-          setSelectedLanguage(defaultLang);
-        }
+      // Idiomas para el set de la edición seleccionada
+      const printsInSameSet = allCardPrints.filter(card => card.set === selectedPrint.set);
+      const editionLanguages = Array.from(new Set(printsInSameSet.map(card => card.lang)));
+      setAvailableLanguages(editionLanguages);
+
+      if (editionLanguages.length > 0 && !editionLanguages.includes(selectedLanguage)) {
+        const defaultLang = editionLanguages.includes('en') ? 'en' : (editionLanguages.includes(lang) ? lang : editionLanguages[0]);
+        setSelectedLanguage(defaultLang);
+      }
+
+      // Finishes (solo los de esta impresión específica)
+      if (selectedPrint.finishes && selectedPrint.finishes.length > 0) {
+          setAvailableFinishes(selectedPrint.finishes);
+          setSelectedFinish(
+            selectedPrint.finishes.includes('nonfoil') ? 'nonfoil' : selectedPrint.finishes[0]
+          );
+      }
     }
-  }, [selectedEditionId, allCardPrints, cardEditions, lang, selectedLanguage]);
-
+  }, [selectedEditionId, allCardPrints, lang, selectedLanguage]);
 
   /* ---------- Actualizar imagen/precio cuando cambia el idioma (si existe la versión) ---------- */
   useEffect(() => {
     if (!selectedLanguage || !selectedEditionId || allCardPrints.length === 0) return;
 
-    const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
-    if (!selectedEdition) return;
+    const currentPrint = allCardPrints.find(e => e.id === selectedEditionId);
+    if (!currentPrint) return;
 
-    // Buscar si existe una impresión de esta carta en el set y el idioma seleccionados
     const cardInSelectedLanguage = allCardPrints.find(
-      card => card.set === selectedEdition.set && card.lang === selectedLanguage
+      card => card.set === currentPrint.set && card.lang === selectedLanguage
     );
 
-    if (cardInSelectedLanguage) {
-      if (cardInSelectedLanguage.image_uris?.large) setSelectedCardImage(cardInSelectedLanguage.image_uris.large);
-      // Actualizar el precio si la versión en otro idioma tiene uno diferente
+    if (cardInSelectedLanguage && cardInSelectedLanguage.image_uris?.large) {
+      setSelectedCardImage(cardInSelectedLanguage.image_uris.large);
       const price = cardInSelectedLanguage.prices?.usd || cardInSelectedLanguage.prices?.usd_foil || cardInSelectedLanguage.prices?.usd_etched;
       setMarketPrice(price || null);
     }
-  }, [selectedLanguage, selectedEditionId, allCardPrints, cardEditions]);
+  }, [selectedLanguage, selectedEditionId, allCardPrints]);
 
-
-  /* ---------- Seleccionar por defecto la edición cuando cardEditions cambia (fallback) ---------- */
+  /* ---------- Seleccionar por defecto la edición cuando la lista de ediciones únicas cambia ---------- */
   useEffect(() => {
-    if (cardEditions.length > 0 && !selectedEditionId) {
-      setSelectedEditionId(cardEditions[0].id);
+    if (uniqueEditions.length > 0 && !selectedEditionId) {
+      setSelectedEditionId(uniqueEditions[0].id);
     }
-  }, [cardEditions, selectedEditionId]);
+  }, [uniqueEditions, selectedEditionId]);
 
 
   /* ---------- Input handlers ---------- */
@@ -147,9 +161,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     setSearchQuery(value);
 
     if (selectedCardName && value !== selectedCardName) {
-      // resetear todo si el usuario cambia el nombre de la carta
       setSelectedCardName(null);
-      setCardEditions([]);
       setAllCardPrints([]);
       setSelectedEditionId('');
       setAvailableLanguages([]);
@@ -185,55 +197,26 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     setSelectedCardName(suggestion);
     setIsFetchingEditions(true);
 
-    // resetear estados dependientes
     setSelectedEditionId('');
     setMarketPrice(null);
     setAvailableLanguages([]);
     setSelectedLanguage('');
     setAvailableFinishes([]);
     setSelectedFinish('');
-    setCardEditions([]);
     setAllCardPrints([]);
 
     try {
-      // Unica llamada a la API para obtener todas las impresiones, incluyendo todos los idiomas
       const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(suggestion)}"&unique=prints&include_multilingual=true`);
       if (!response.ok) throw new Error('Failed to fetch card editions');
       const data = await response.json();
 
-      const allPrints: ScryfallCard[] = data.data.filter((card: any) => !card.digital);
-      setAllCardPrints(allPrints); // Guardar todas las impresiones para uso futuro (cambio de idioma/edición)
+      const prints: ScryfallCard[] = data.data.filter((card: any) => !card.digital);
+      setAllCardPrints(prints); 
 
-      const allFinishes = Array.from(new Set(allPrints.flatMap(p => p.finishes || [])));
-      setAvailableFinishes(allFinishes);
-      if (allFinishes.length > 0) {
-        setSelectedFinish(allFinishes.includes('nonfoil') ? 'nonfoil' : allFinishes[0]);
-      }
-
-      // Agrupar por set para mostrar una edición por set (tomando la versión en inglés si existe)
-      const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], print) => {
-        if (!acc.find(p => p.set === print.set)) {
-          const englishVersion = allPrints.find(p => p.set === print.set && p.lang === 'en');
-          acc.push(englishVersion || print);
-        }
-        return acc;
-      }, []);
-
-      uniqueEditions.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
-
-      setCardEditions(uniqueEditions);
-
-      // Pre-seleccionar la primera edición para que los demás useEffect se disparen
-      if (uniqueEditions.length > 0) {
-        setSelectedEditionId(uniqueEditions[0].id);
-      }
-
+      // La pre-selección ahora se gestiona en los `useEffect` que dependen de `uniqueEditions`
     } catch (error) {
       console.error(error);
-      // Reseteo completo en caso de error
-      setCardEditions([]);
       setAllCardPrints([]);
-      setAvailableLanguages([]);
     } finally {
       setIsFetchingEditions(false);
       setSuggestions([]);
@@ -249,7 +232,14 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [suggestionsRef]);
+  }, []);
+
+  const printsForSelectedSet = useMemo(() => {
+      if (!selectedEditionId) return [];
+      const selectedSet = uniqueEditions.find(p => p.id === selectedEditionId)?.set;
+      if (!selectedSet) return [];
+      return allCardPrints.filter(p => p.set === selectedSet);
+  }, [selectedEditionId, uniqueEditions, allCardPrints]);
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -295,26 +285,23 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
               </div>
 
               <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
+                 <div className="space-y-2">
                   <Label htmlFor="edition">{t.editionLabel}</Label>
                   <Select
-                    disabled={!selectedCardName || isFetchingEditions || cardEditions.length === 0}
+                    disabled={!selectedCardName || isFetchingEditions || uniqueEditions.length === 0}
                     value={selectedEditionId}
                     onValueChange={setSelectedEditionId}>
                     <SelectTrigger id="edition">
                       <SelectValue placeholder={
-                        isFetchingEditions ? "Cargando..." : (cardEditions.length === 0 && selectedCardName ? "No se encontraron ediciones" : t.selectEdition)
+                        isFetchingEditions ? "Cargando..." : (uniqueEditions.length === 0 && selectedCardName ? "No se encontraron ediciones" : t.selectEdition)
                       } />
                     </SelectTrigger>
                     <SelectContent>
-                      {cardEditions.map((edition) => {
-                        const variantInfo = getVariantInfo(edition);
-                        return (
+                      {uniqueEditions.map((edition) => (
                           <SelectItem key={edition.id} value={edition.id}>
-                            {edition.set_name} {variantInfo}
+                            {edition.set_name}
                           </SelectItem>
-                        );
-                      })}
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -404,23 +391,26 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="foil">{t.foilLabel}</Label>
-              <Select
-                disabled={availableFinishes.length === 0}
-                value={selectedFinish}
-                onValueChange={setSelectedFinish}
-              >
-                <SelectTrigger id="foil">
-                  <SelectValue placeholder={t.selectFoil} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableFinishes.map((finish) => (
-                    <SelectItem key={finish} value={finish}>
-                      {t.foils[finish as keyof typeof t.foils] || finish}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Label htmlFor="print-variant">Variante de Impresión</Label>
+                <Select
+                    disabled={printsForSelectedSet.length === 0}
+                    value={selectedEditionId}
+                    onValueChange={setSelectedEditionId}
+                >
+                    <SelectTrigger id="print-variant">
+                        <SelectValue placeholder="Selecciona una variante" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {printsForSelectedSet.map((print) => {
+                            const variantInfo = getVariantInfo(print);
+                            return print.finishes.map((finish) => (
+                                <SelectItem key={`${print.id}-${finish}`} value={print.id}>
+                                    {finish === 'nonfoil' && !variantInfo ? 'Regular' : `${variantInfo} ${finish}`.trim()}
+                                </SelectItem>
+                            ));
+                        })}
+                    </SelectContent>
+                </Select>
             </div>
 
             <div className="space-y-2 md:col-span-2">
