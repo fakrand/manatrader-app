@@ -41,7 +41,9 @@ type ScryfallCard = {
     prices: {
         usd: string | null;
         usd_foil: string | null;
-    }
+        usd_etched: string | null;
+    };
+    finishes: string[];
 };
 
 export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'], lang: Locale }) {
@@ -58,6 +60,8 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     const [marketPrice, setMarketPrice] = useState<string | null>(null);
     const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
     const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+    const [availableFinishes, setAvailableFinishes] = useState<string[]>([]);
+    const [selectedFinish, setSelectedFinish] = useState('');
 
     const suggestionsRef = useRef<HTMLUListElement>(null);
 
@@ -75,7 +79,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                  if(edition.image_uris) {
                     setSelectedCardImage(edition.image_uris.large);
                  }
-                 const price = edition.prices?.usd || edition.prices?.usd_foil;
+                 const price = edition.prices?.usd || edition.prices?.usd_foil || edition.prices?.usd_etched;
                  setMarketPrice(price || null);
             }
         } else {
@@ -93,6 +97,8 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         setSelectedEditionId('');
         setAvailableLanguages([]);
         setSelectedLanguage('');
+        setAvailableFinishes([]);
+        setSelectedFinish('');
         if (value) {
             setSuggestions(filteredSuggestions);
         } else {
@@ -127,6 +133,8 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         setMarketPrice(null);
         setAvailableLanguages([]);
         setSelectedLanguage('');
+        setAvailableFinishes([]);
+        setSelectedFinish('');
         
         try {
             const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=%21"${encodeURIComponent(suggestion)}"`);
@@ -140,7 +148,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             const allPrints: ScryfallCard[] = data.data.filter((card: any) => !card.digital);
             
             // Sort by release date
-            allPrints.sort((a, b) => new Date(a.released_at).getTime() - new Date(b.released_at).getTime());
+            allPrints.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
 
             const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], current) => {
                 if (!acc.some(item => item.set === current.set)) {
@@ -153,6 +161,12 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             setAvailableLanguages(uniqueLanguages);
             if (uniqueLanguages.length > 0) {
                 setSelectedLanguage(uniqueLanguages.includes(lang) ? lang : uniqueLanguages[0]);
+            }
+
+            const allFinishes = [...new Set(allPrints.flatMap(p => p.finishes))];
+            setAvailableFinishes(allFinishes);
+            if (allFinishes.length > 0) {
+                setSelectedFinish(allFinishes.includes('nonfoil') ? 'nonfoil' : allFinishes[0]);
             }
 
             setCardEditions(uniqueEditions);
@@ -327,15 +341,20 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="foil">{t.foilLabel}</Label>
-                            <Select disabled={!selectedCardName}>
+                            <Select 
+                                disabled={availableFinishes.length === 0}
+                                value={selectedFinish}
+                                onValueChange={setSelectedFinish}
+                            >
                                 <SelectTrigger id="foil">
                                     <SelectValue placeholder={t.selectFoil} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="none">{t.foils.none}</SelectItem>
-                                    <SelectItem value="foil">{t.foils.foil}</SelectItem>
-                                    <SelectItem value="etched">{t.foils.etched}</SelectItem>
-                                    <SelectItem value="galaxy">{t.foils.galaxy}</SelectItem>
+                                    {availableFinishes.map((finish) => (
+                                        <SelectItem key={finish} value={finish}>
+                                            {t.foils[finish as keyof typeof t.foils] || finish}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>

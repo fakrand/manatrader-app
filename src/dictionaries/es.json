@@ -122,9 +122,10 @@
     "foilLabel": "Tipo de Foil",
     "selectFoil": "Selecciona el tipo de foil",
     "foils": {
-      "none": "Ninguno",
+      "nonfoil": "Normal",
       "foil": "Foil",
       "etched": "Etched",
+      "glossy": "Glossy",
       "galaxy": "Galaxy Foil"
     },
     "imagesLabel": "Imágenes (Opcional)",
@@ -176,3 +177,5 @@
     "description": "Compra, vende e intercambia cartas de Magic: The Gathering en Perú. La comunidad más grande de jugadores y tiendas."
   }
 }
+
+    

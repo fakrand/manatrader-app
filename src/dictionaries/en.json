@@ -122,9 +122,10 @@
     "foilLabel": "Foil Type",
     "selectFoil": "Select foil type",
     "foils": {
-      "none": "None",
+      "nonfoil": "Non-Foil",
       "foil": "Foil",
       "etched": "Etched",
+      "glossy": "Glossy",
       "galaxy": "Galaxy Foil"
     },
     "imagesLabel": "Images (Optional)",
@@ -176,3 +177,5 @@
     "description": "Buy, sell, and trade Magic: The Gathering cards in Peru. The largest community of players and stores."
   }
 }
+
+    
