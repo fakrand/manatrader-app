@@ -37,7 +37,7 @@ type CreateListingClientPageProps = {
 function CreateListingClientPage({ t, lang }: CreateListingClientPageProps) {
     const listingLimitReached = false;
 
-    const [searchQuery, setSearchQuery]_useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [activeSuggestion, setActiveSuggestion] = useState(-1);
     const [selectedCard, setSelectedCard] = useState<string | null>(null);
