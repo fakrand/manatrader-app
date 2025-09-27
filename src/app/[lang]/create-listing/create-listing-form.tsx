@@ -147,7 +147,7 @@ useEffect(() => {
     };
 
     fetchLanguagesForEdition();
-}, [selectedEditionId, selectedCardName, lang]);
+}, [selectedEditionId, selectedCardName, lang, cardEditions, selectedLanguage]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -185,9 +185,9 @@ useEffect(() => {
     };
 
     const handleSuggestionClick = async (suggestion: string) => {
+        setSuggestions([]); // Mover al inicio para evitar el parpadeo
         setSearchQuery(suggestion);
         setSelectedCardName(suggestion);
-        setSuggestions([]);
         setIsFetchingEditions(true);
         
         // Reset dependent fields
@@ -234,6 +234,7 @@ useEffect(() => {
             setAvailableLanguages([]);
         } finally {
             setIsFetchingEditions(false);
+            setSuggestions([]); // Asegurar que se mantengan vacías
         }
     };
     
@@ -461,5 +462,7 @@ useEffect(() => {
 
 
 
+
+    
 
     
