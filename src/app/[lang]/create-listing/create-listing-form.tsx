@@ -58,7 +58,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
 
     useEffect(() => {
         const fetchSuggestions = async () => {
-            if (debouncedSearchQuery.length < 3) {
+            if (debouncedSearchQuery.length < 3 || debouncedSearchQuery === selectedCardName) {
                 setSuggestions([]);
                 return;
             }
@@ -77,7 +77,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         };
 
         fetchSuggestions();
-    }, [debouncedSearchQuery]);
+    }, [debouncedSearchQuery, selectedCardName]);
 
     useEffect(() => {
         if (selectedEditionId) {
@@ -99,7 +99,9 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchQuery(value);
-        setSelectedCardName(null);
+        if (selectedCardName && value !== selectedCardName) {
+            setSelectedCardName(null);
+        }
         setActiveSuggestion(-1);
     };
 
@@ -161,7 +163,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             }
             
              // Sort by release date DESC
-            allPrints.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
+            allPrints.sort((a, b) => new Date(a.released_at).getTime() - new Date(b.released_at).getTime());
 
 
             // Reduce to unique sets, keeping the first one found (which will be the most recent print in that set)
@@ -395,3 +397,4 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
 
     
     
+
