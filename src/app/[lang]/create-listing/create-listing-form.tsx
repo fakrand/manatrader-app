@@ -13,19 +13,8 @@ import { HelpCircle, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Locale } from "@/i18n-config";
 import { cn } from '@/lib/utils';
 import { Dictionary } from '@/lib/definitions';
+import { useDebounce } from 'usehooks-ts';
 
-const MOCK_CARD_NAMES = [
-    "Sol Ring",
-    "Swords to Plowshares",
-    "Black Lotus",
-    "Brainstorm",
-    "Lightning Bolt",
-    "Counterspell",
-    "Dark Ritual",
-    "Demonic Tutor",
-    "Birds of Paradise",
-    "Wrath of God"
-];
 
 type ScryfallCard = {
     id: string;
@@ -50,6 +39,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     const listingLimitReached = false;
 
     const [searchQuery, setSearchQuery] = useState('');
+    const debouncedSearchQuery = useDebounce(searchQuery, 300);
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [activeSuggestion, setActiveSuggestion] = useState(-1);
     const [selectedCardName, setSelectedCardName] = useState<string | null>(null);
@@ -65,12 +55,28 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
 
     const suggestionsRef = useRef<HTMLUListElement>(null);
 
-    const filteredSuggestions = useMemo(() => {
-        if (!searchQuery) return [];
-        return MOCK_CARD_NAMES.filter(name =>
-            name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    }, [searchQuery]);
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (debouncedSearchQuery.length < 3) {
+                setSuggestions([]);
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(debouncedSearchQuery)}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch autocomplete suggestions');
+                }
+                const data = await response.json();
+                setSuggestions(data.data || []);
+            } catch (error) {
+                console.error(error);
+                setSuggestions([]);
+            }
+        };
+
+        fetchSuggestions();
+    }, [debouncedSearchQuery]);
 
     useEffect(() => {
         if (selectedEditionId) {
@@ -93,17 +99,6 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         const value = e.target.value;
         setSearchQuery(value);
         setSelectedCardName(null);
-        setCardEditions([]);
-        setSelectedEditionId('');
-        setAvailableLanguages([]);
-        setSelectedLanguage('');
-        setAvailableFinishes([]);
-        setSelectedFinish('');
-        if (value) {
-            setSuggestions(filteredSuggestions);
-        } else {
-            setSuggestions([]);
-        }
         setActiveSuggestion(-1);
     };
 
@@ -164,8 +159,9 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                 setSelectedFinish(allFinishes.includes('nonfoil') ? 'nonfoil' : allFinishes[0]);
             }
             
-            // Sort by release date DESC
+             // Sort by release date DESC
             allPrints.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
+
 
             // Reduce to unique sets, keeping the first one found (which will be the most recent print in that set)
             const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], current) => {
@@ -396,4 +392,5 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     );
 }
 
+    
     
