@@ -119,7 +119,7 @@ useEffect(() => {
             const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
             if (selectedEdition) {
                 try {
-                    const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(selectedCardName)}" set:${selectedEdition.set}`);
+                    const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(selectedCardName)}" set:${selectedEdition.set}&include_multilingual=true`);
                     const data = await response.json();
                     
                     if (data.data) {
@@ -135,13 +135,19 @@ useEffect(() => {
                     }
                 } catch (error) {
                     console.error('Error fetching languages for edition:', error);
+                    // Mantener el idioma actual como fallback
+                    const currentEdition = cardEditions.find(e => e.id === selectedEditionId);
+                    if (currentEdition) {
+                        setAvailableLanguages([currentEdition.lang]);
+                        setSelectedLanguage(currentEdition.lang);
+                    }
                 }
             }
         }
     };
 
     fetchLanguagesForEdition();
-}, [selectedEditionId, selectedCardName, lang, selectedLanguage, cardEditions]);
+}, [selectedEditionId, selectedCardName, lang]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -194,7 +200,7 @@ useEffect(() => {
         setCardEditions([]);
 
         try {
-            const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=%21"${encodeURIComponent(suggestion)}"`);
+            const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(suggestion)}"&unique=prints&include_multilingual=true`);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch card editions');
@@ -454,3 +460,6 @@ useEffect(() => {
     
 
 
+
+
+    
