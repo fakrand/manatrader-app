@@ -27,10 +27,6 @@ const SmartFilterSuggestionsOutputSchema = z.object({
 });
 export type SmartFilterSuggestionsOutput = z.infer<typeof SmartFilterSuggestionsOutputSchema>;
 
-export async function getSmartFilterSuggestions(input: SmartFilterSuggestionsInput): Promise<SmartFilterSuggestionsOutput> {
-  return smartFilterSuggestionsFlow(input);
-}
-
 const smartFilterSuggestionsPrompt = ai.definePrompt({
   name: 'smartFilterSuggestionsPrompt',
   input: {schema: SmartFilterSuggestionsInputSchema},
@@ -53,7 +49,7 @@ Suggest filters in JSON format:
 `,
 });
 
-const smartFilterSuggestionsFlow = ai.defineFlow(
+export const smartFilterSuggestionsFlow = ai.defineFlow(
   {
     name: 'smartFilterSuggestionsFlow',
     inputSchema: SmartFilterSuggestionsInputSchema,
@@ -64,4 +60,3 @@ const smartFilterSuggestionsFlow = ai.defineFlow(
     return output!;
   }
 );
-
