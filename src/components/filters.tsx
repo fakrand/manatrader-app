@@ -4,7 +4,6 @@
 import { useState, useTransition, useCallback } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
-import { useDebounceCallback } from 'usehooks-ts'
 
 import { Input } from '@/components/ui/input';
 import {
@@ -19,7 +18,6 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from './ui/button';
 import { ManaSymbol } from './mana-symbol';
 import { cn } from '@/lib/utils';
-import { fetchSmartFilters } from '@/app/actions';
 import { Locale } from '@/i18n-config';
 import { Dictionary } from '@/lib/definitions';
 

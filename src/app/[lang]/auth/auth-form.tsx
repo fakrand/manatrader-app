@@ -1,30 +1,22 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useActionState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  ConfirmationResult,
-} from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { Locale } from '@/i18n-config';
 import { cn } from '@/lib/utils';
 import { Dictionary } from '@/lib/definitions';
+import { signUpWithEmail, signInWithEmail, signInWithGoogle, sendVerificationCode, verifyPhoneNumber } from './actions';
+import { ConfirmationResult } from 'firebase/auth';
 
 type AuthFormProps = {
   t: Dictionary['auth'];
@@ -45,10 +37,9 @@ const codeSchema = z.object({
 });
 
 declare global {
-    interface Window {
-        recaptchaVerifier?: RecaptchaVerifier,
-        confirmationResult?: ConfirmationResult
-    }
+  interface Window {
+    confirmationResult?: ConfirmationResult;
+  }
 }
 
 const emailDomains = ['gmail.com', 'outlook.com', 'yahoo.com'];
@@ -56,13 +47,21 @@ const emailDomains = ['gmail.com', 'outlook.com', 'yahoo.com'];
 export function AuthForm({ t, lang }: AuthFormProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [phoneStep, setPhoneStep] = useState<'phone' | 'code'>('phone');
   
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const suggestionsRef = useRef<HTMLUListElement>(null);
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
   
+  const [phoneStep, setPhoneStep] = useState<'phone' | 'code'>('phone');
+  
+  const [signUpState, signUpAction, isSigningUp] = useActionState(signUpWithEmail, undefined);
+  const [signInState, signInAction, isSigningIn] = useActionState(signInWithEmail, undefined);
+  const [googleSignInState, googleSignInAction, isSigningInWithGoogle] = useActionState(signInWithGoogle, undefined);
+  const [phoneState, phoneAction, isSendingCode] = useActionState(sendVerificationCode, undefined);
+  const [codeState, codeAction, isVerifyingCode] = useActionState(verifyPhoneNumber, undefined);
+
+
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: '', password: '' },
@@ -78,93 +77,50 @@ export function AuthForm({ t, lang }: AuthFormProps) {
     defaultValues: { code: '' },
   });
 
-  const handleAuthError = (error: any) => {
-    let description = error.message; // Default message
-    if (lang === 'es') {
-        switch (error.code) {
-            case 'auth/invalid-credential':
-                description = 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.';
-                break;
-            case 'auth/email-already-in-use':
-                description = 'Este correo electrónico ya está en uso. Por favor, intenta con otro.';
-                break;
-            case 'auth/weak-password':
-                description = 'La contraseña es demasiado débil. Debe tener al menos 6 caracteres.';
-                break;
-            case 'auth/invalid-email':
-                description = 'El formato del correo electrónico no es válido.';
-                break;
-            default:
-                description = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
-        }
-    }
-    toast({ variant: 'destructive', title: t.error, description });
-  };
-
-  const handleAuth = async (action: 'signup' | 'login', data: z.infer<typeof emailSchema>) => {
-    setIsSubmitting(true);
-    try {
-      if (action === 'signup') {
-        await createUserWithEmailAndPassword(auth, data.email, data.password);
-      } else {
-        await signInWithEmailAndPassword(auth, data.email, data.password);
-      }
-      router.push(`/${lang}/profile`);
-    } catch (error: any) {
-      handleAuthError(error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      router.push(`/${lang}/profile`);
-    } catch (error: any) {
-      handleAuthError(error);
-    }
-  };
-
-  const setupRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response: any) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        }
+  const handleAuthResult = (state: { error?: string; success?: boolean } | undefined, redirect: boolean = true) => {
+    if (state?.error) {
+      const errorMessageKey = state.error as keyof Dictionary['auth']['errors'];
+      toast({ 
+        variant: 'destructive', 
+        title: t.error, 
+        description: t.errors[errorMessageKey] || t.errors['auth/default'] 
       });
     }
-    return window.recaptchaVerifier;
-  }
-
-  const onPhoneSignInSubmit = async (data: z.infer<typeof phoneSchema>) => {
-    setIsSubmitting(true);
-    const verifier = setupRecaptcha();
-    try {
-      const confirmationResult = await signInWithPhoneNumber(auth, `+51${data.phone}`, verifier);
-      window.confirmationResult = confirmationResult;
-      setPhoneStep('code');
-    } catch(error: any) {
-       handleAuthError(error);
-    } finally {
-        setIsSubmitting(false);
+    if (state?.success && redirect) {
+      router.push(`/${lang}/profile`);
     }
-  }
+  };
 
-  const onCodeSubmit = async (data: z.infer<typeof codeSchema>) => {
-      setIsSubmitting(true);
-      try {
-        await window.confirmationResult?.confirm(data.code);
+  useEffect(() => {
+    handleAuthResult(signUpState);
+  }, [signUpState]);
+
+  useEffect(() => {
+    handleAuthResult(signInState);
+  }, [signInState]);
+
+  useEffect(() => {
+    handleAuthResult(googleSignInState, false); // Google redirect is handled by Firebase
+  }, [googleSignInState]);
+  
+  useEffect(() => {
+     if(phoneState?.success) {
+        setPhoneStep('code');
+     }
+     if(phoneState?.error) {
+        handleAuthResult(phoneState);
+     }
+  }, [phoneState]);
+
+   useEffect(() => {
+     if(codeState?.success) {
         router.push(`/${lang}/profile`);
-      } catch (error: any) {
-         handleAuthError(error);
-      } finally {
-          setIsSubmitting(false);
-      }
-  }
-
+     }
+     if(codeState?.error) {
+        handleAuthResult(codeState);
+     }
+  }, [codeState]);
+  
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     emailForm.setValue('email', value);
@@ -222,6 +178,8 @@ export function AuthForm({ t, lang }: AuthFormProps) {
     };
   }, [suggestionsRef]);
 
+  const isSubmitting = isSigningIn || isSigningUp || isSigningInWithGoogle || isSendingCode || isVerifyingCode;
+
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -237,7 +195,7 @@ export function AuthForm({ t, lang }: AuthFormProps) {
           
           <TabsContent value="email">
             <Form {...emailForm}>
-              <form onSubmit={(e) => e.preventDefault()} className="space-y-4 pt-4">
+              <form className="space-y-4 pt-4">
                 <FormField
                   control={emailForm.control}
                   name="email"
@@ -289,8 +247,21 @@ export function AuthForm({ t, lang }: AuthFormProps) {
                   )}
                 />
                 <div className="flex gap-2">
-                  <Button onClick={emailForm.handleSubmit((d) => handleAuth('login', d))} disabled={isSubmitting} className="w-full">{t.login}</Button>
-                  <Button onClick={emailForm.handleSubmit((d) => handleAuth('signup', d))} disabled={isSubmitting} variant="secondary" className="w-full">{t.signup}</Button>
+                  <Button 
+                    onClick={() => emailForm.handleSubmit((data) => signInAction(data))()} 
+                    disabled={isSubmitting} 
+                    className="w-full"
+                  >
+                    {t.login}
+                  </Button>
+                  <Button 
+                    onClick={() => emailForm.handleSubmit((data) => signUpAction(data))()}
+                    disabled={isSubmitting} 
+                    variant="secondary" 
+                    className="w-full"
+                  >
+                    {t.signup}
+                  </Button>
                 </div>
               </form>
             </Form>
@@ -304,7 +275,12 @@ export function AuthForm({ t, lang }: AuthFormProps) {
                 </span>
               </div>
             </div>
-             <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+             <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => googleSignInAction()}
+                disabled={isSubmitting}
+              >
                 {t.google}
             </Button>
           </TabsContent>
@@ -312,7 +288,7 @@ export function AuthForm({ t, lang }: AuthFormProps) {
           <TabsContent value="phone">
             {phoneStep === 'phone' ? (
                 <Form {...phoneForm}>
-                    <form onSubmit={phoneForm.handleSubmit(onPhoneSignInSubmit)} className="space-y-4 pt-4">
+                    <form onSubmit={phoneForm.handleSubmit((data) => phoneAction({phone: `+51${data.phone}`}))} className="space-y-4 pt-4">
                         <FormField
                         control={phoneForm.control}
                         name="phone"
@@ -334,7 +310,7 @@ export function AuthForm({ t, lang }: AuthFormProps) {
                 </Form>
             ) : (
                 <Form {...codeForm}>
-                    <form onSubmit={codeForm.handleSubmit(onCodeSubmit)} className="space-y-4 pt-4">
+                    <form onSubmit={codeForm.handleSubmit(data => codeAction({verificationCode: data.code}))} className="space-y-4 pt-4">
                         <FormField
                         control={codeForm.control}
                         name="code"
@@ -354,7 +330,7 @@ export function AuthForm({ t, lang }: AuthFormProps) {
             )}
           </TabsContent>
         </Tabs>
-        <div id="recaptcha-container"></div>
+        <div id="recaptcha-container" ref={recaptchaContainerRef}></div>
       </CardContent>
     </Card>
   );

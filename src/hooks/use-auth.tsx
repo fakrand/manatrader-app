@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -36,7 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
 
       const lang = (pathname.split('/')[1] || i18n.defaultLocale) as Locale;
-      const currentRoute = pathname.substring(pathname.indexOf('/', 1));
+      // This is safe because `pathname` will always have at least one segment
+      const currentRoute = '/' + (pathname.split('/').slice(2).join('/') || '');
 
       if (!user && protectedRoutes.some(route => currentRoute.startsWith(route))) {
         router.push(`/${lang}/auth`);
@@ -61,6 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => useContext(AuthContext);
 
+// The AuthLayout component is removed from here to be handled by the page itself.
+// This was a source of server/client context conflicts.
 export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -69,12 +73,11 @@ export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
   useEffect(() => {
     if (!loading && user) {
-      router.push(`/${lang}/profile`);
+      router.replace(`/${lang}/profile`);
     }
   }, [user, loading, router, lang]);
 
   if (loading || user) {
-    // You can show a loading spinner here
     return (
         <div className="flex justify-center items-center h-screen">
             <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
@@ -83,4 +86,4 @@ export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   }
 
   return <>{children}</>;
-}
+};

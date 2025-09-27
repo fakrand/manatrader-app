@@ -150,7 +150,14 @@
     "sendCode": "Send Code",
     "codeLabel": "Verification Code",
     "verifyCode": "Verify Code",
-    "error": "Authentication Error"
+    "error": "Authentication Error",
+    "errors": {
+      "auth/invalid-credential": "Invalid credentials. Please check your email and password.",
+      "auth/email-already-in-use": "This email is already in use. Please try another.",
+      "auth/weak-password": "Password is too weak. It must be at least 6 characters.",
+      "auth/invalid-email": "The email format is not valid.",
+      "auth/default": "An unexpected error occurred. Please try again."
+    }
   },
   "metadata": {
     "title": "ManaTrader - Magic: The Gathering Marketplace Peru",

@@ -155,6 +155,13 @@ export type Dictionary = {
     codeLabel: string;
     verifyCode: string;
     error: string;
+    errors: {
+      'auth/invalid-credential': string;
+      'auth/email-already-in-use': string;
+      'auth/weak-password': string;
+      'auth/invalid-email': string;
+      'auth/default': string;
+    }
   };
   metadata: {
     title: string;
