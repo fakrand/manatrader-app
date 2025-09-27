@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from 'react';
@@ -13,7 +14,7 @@ import { HelpCircle, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Locale } from "@/i18n-config";
 import { cn } from '@/lib/utils';
 import { Dictionary } from '@/lib/definitions';
-import { useDebounce } from 'usehooks-ts';
+import { useDebounceValue } from 'usehooks-ts';
 
 
 type ScryfallCard = {
@@ -39,7 +40,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     const listingLimitReached = false;
 
     const [searchQuery, setSearchQuery] = useState('');
-    const debouncedSearchQuery = useDebounce(searchQuery, 300);
+    const [debouncedSearchQuery] = useDebounceValue(searchQuery, 300);
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [activeSuggestion, setActiveSuggestion] = useState(-1);
     const [selectedCardName, setSelectedCardName] = useState<string | null>(null);
@@ -261,7 +262,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                 </Select>
                             </div>
                            <div className="grid grid-cols-2 gap-6">
-                               <div className="space-y-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="condition">{t.conditionLabel}</Label>
                                     <Select>
                                         <SelectTrigger id="condition">
