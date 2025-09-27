@@ -205,14 +205,6 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             
             const allPrints: ScryfallCard[] = data.data.filter((card: any) => !card.digital);
             
-            const uniqueLanguages = [...new Set(allPrints.map(card => card.lang))];
-            setAvailableLanguages(uniqueLanguages);
-            if (uniqueLanguages.length > 0) {
-                 // Check if the app's current language is available for the card
-                const defaultLang = uniqueLanguages.includes(lang) ? lang : uniqueLanguages[0];
-                setSelectedLanguage(defaultLang);
-            }
-
             const allFinishes = [...new Set(allPrints.flatMap(p => p.finishes))];
             setAvailableFinishes(allFinishes);
             if (allFinishes.length > 0) {
@@ -470,4 +462,5 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     
 
     
+
 
