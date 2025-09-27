@@ -331,5 +331,3 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         </div>
     );
 }
-
-    
