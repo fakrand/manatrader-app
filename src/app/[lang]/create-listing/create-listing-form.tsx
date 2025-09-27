@@ -1,8 +1,7 @@
 
-
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,462 +15,443 @@ import { cn } from '@/lib/utils';
 import { Dictionary } from '@/lib/definitions';
 import { useDebounceValue } from 'usehooks-ts';
 
-
 type ScryfallCard = {
-    id: string;
-    name: string;
-    set: string;
-    set_name: string;
-    digital: boolean;
-    lang: string;
-    released_at: string;
-    image_uris?: {
-        large: string;
-    };
-    prices: {
-        usd: string | null;
-        usd_foil: string | null;
-        usd_etched: string | null;
-    };
-    finishes: string[];
-    border_color: string;
-    frame_effects?: string[];
-    frame: string; // e.g., '2015', '1997' (retro)
-    promo_types?: string[];
-    full_art: boolean;
+  id: string;
+  name: string;
+  set: string;
+  set_name: string;
+  digital: boolean;
+  lang: string;
+  released_at: string;
+  image_uris?: { large: string };
+  prices: { usd: string | null; usd_foil: string | null; usd_etched: string | null; };
+  finishes: string[];
+  border_color: string;
+  frame_effects?: string[];
+  frame: string;
+  promo_types?: string[];
+  full_art: boolean;
 };
 
 function getVariantInfo(card: ScryfallCard) {
-    const parts = new Set<string>();
-    if (card.frame_effects?.includes('showcase')) parts.add('Showcase');
-    if (card.border_color === 'borderless') parts.add('Borderless');
-    if (card.frame_effects?.includes('extendedart')) parts.add('Extended Art');
-    if (card.frame === '1997' || card.promo_types?.includes('retroframe')) parts.add('Retro Frame');
-    if (card.full_art) parts.add('Full Art');
-    
-    const partsArray = Array.from(parts);
-    return partsArray.length > 0 ? `(${partsArray.join(', ')})` : '';
+  const parts = new Set<string>();
+  if (card.frame_effects?.includes('showcase')) parts.add('Showcase');
+  if (card.border_color === 'borderless') parts.add('Borderless');
+  if (card.frame_effects?.includes('extendedart')) parts.add('Extended Art');
+  if (card.frame === '1997' || card.promo_types?.includes('retroframe')) parts.add('Retro Frame');
+  if (card.full_art) parts.add('Full Art');
+  const partsArray = Array.from(parts);
+  return partsArray.length > 0 ? `(${partsArray.join(', ')})` : '';
 }
-
 
 export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'], lang: Locale }) {
-    const listingLimitReached = false;
+  const listingLimitReached = false;
 
-    const [searchQuery, setSearchQuery] = useState('');
-    const [debouncedSearchQuery] = useDebounceValue(searchQuery, 300);
-    const [suggestions, setSuggestions] = useState<string[]>([]);
-    const [activeSuggestion, setActiveSuggestion] = useState(-1);
-    const [selectedCardName, setSelectedCardName] = useState<string | null>(null);
-    const [cardEditions, setCardEditions] = useState<ScryfallCard[]>([]);
-    const [isFetchingEditions, setIsFetchingEditions] = useState(false);
-    const [selectedEditionId, setSelectedEditionId] = useState<string>('');
-    const [selectedCardImage, setSelectedCardImage] = useState<string>('/card-back.png');
-    const [marketPrice, setMarketPrice] = useState<string | null>(null);
-    const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
-    const [selectedLanguage, setSelectedLanguage] = useState<string>('');
-    const [availableFinishes, setAvailableFinishes] = useState<string[]>([]);
-    const [selectedFinish, setSelectedFinish] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery] = useDebounceValue(searchQuery, 300);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
 
-    const suggestionsRef = useRef<HTMLUListElement>(null);
+  const [selectedCardName, setSelectedCardName] = useState<string | null>(null);
+  const [cardEditions, setCardEditions] = useState<ScryfallCard[]>([]);
+  const [allCardPrints, setAllCardPrints] = useState<ScryfallCard[]>([]);
+  const [isFetchingEditions, setIsFetchingEditions] = useState(false);
+  const [selectedEditionId, setSelectedEditionId] = useState<string>('');
+  const [selectedCardImage, setSelectedCardImage] = useState<string>('/card-back.png');
+  const [marketPrice, setMarketPrice] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchSuggestions = async () => {
-            if (debouncedSearchQuery.length < 3 || debouncedSearchQuery === selectedCardName) {
-                setSuggestions([]);
-                return;
-            }
+  const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+  const [availableFinishes, setAvailableFinishes] = useState<string[]>([]);
+  const [selectedFinish, setSelectedFinish] = useState('');
 
-            try {
-                const response = await fetch(`https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(debouncedSearchQuery)}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch autocomplete suggestions');
-                }
-                const data = await response.json();
-                setSuggestions(data.data || []);
-            } catch (error) {
-                console.error(error);
-                setSuggestions([]);
-            }
-        };
+  const suggestionsRef = useRef<HTMLUListElement>(null);
 
-        fetchSuggestions();
-    }, [debouncedSearchQuery, selectedCardName]);
+  /* ---------- Autocomplete ---------- */
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (debouncedSearchQuery.length < 3 || debouncedSearchQuery === selectedCardName) {
+        setSuggestions([]);
+        return;
+      }
+      try {
+        const response = await fetch(`https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(debouncedSearchQuery)}`);
+        if (!response.ok) throw new Error('Failed to fetch autocomplete suggestions');
+        const data = await response.json();
+        setSuggestions(data.data || []);
+      } catch (error) {
+        console.error(error);
+        setSuggestions([]);
+      }
+    };
+    fetchSuggestions();
+  }, [debouncedSearchQuery, selectedCardName]);
 
-    useEffect(() => {
-        if (selectedEditionId) {
-            const edition = cardEditions.find(e => e.id === selectedEditionId);
-            if (edition) {
-                 if(edition.image_uris) {
-                    setSelectedCardImage(edition.image_uris.large);
-                 }
-                 const price = edition.prices?.usd || edition.prices?.usd_foil || edition.prices?.usd_etched;
-                 setMarketPrice(price || null);
-            }
-        } else {
-            setSelectedCardImage('/card-back.png');
-            setMarketPrice(null);
-        }
-    }, [selectedEditionId, cardEditions]);
+  /* ---------- Actualizar imagen/precio/idiomas cuando cambia la edición ---------- */
+  useEffect(() => {
+    if (!selectedEditionId || allCardPrints.length === 0) return;
     
-    useEffect(() => {
-    const fetchLanguagesForEdition = async () => {
-        if (selectedEditionId && selectedCardName) {
-            const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
-            if (selectedEdition) {
-                try {
-                    const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(selectedCardName)}" set:${selectedEdition.set}`);
-                    const data = await response.json();
-                    
-                    if (data && data.data && data.data.length > 0) {
-                        const editionPrints = data.data.filter((card: any) => !card.digital);
-                        const editionLanguages = [...new Set(editionPrints.map((card: any) => card.lang))];
-                        
-                        console.log('Languages found:', editionLanguages); // Para debug
-                        
-                        setAvailableLanguages(editionLanguages);
-                        
-                        // Seleccionar inglés por defecto si está disponible
-                        if (editionLanguages.length > 0) {
-                            const defaultLang = editionLanguages.includes('en') ? 'en' : editionLanguages[0];
-                            setSelectedLanguage(defaultLang);
-                        }
-                    } else {
-                        // Fallback: usar el idioma de la edición seleccionada
-                        setAvailableLanguages([selectedEdition.lang]);
-                        setSelectedLanguage(selectedEdition.lang);
-                    }
-                } catch (error) {
-                    console.error('Error fetching languages for edition:', error);
-                    // Fallback: usar el idioma de la edición seleccionada
-                    setAvailableLanguages([selectedEdition.lang]);
-                    setSelectedLanguage(selectedEdition.lang);
-                }
-            }
+    const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
+    if (selectedEdition) {
+        // Actualizar imagen y precio base de la edición seleccionada
+        if (selectedEdition.image_uris) setSelectedCardImage(selectedEdition.image_uris.large);
+        const price = selectedEdition.prices?.usd || selectedEdition.prices?.usd_foil || selectedEdition.prices?.usd_etched;
+        setMarketPrice(price || null);
+
+        // Actualizar idiomas disponibles para esa edición
+        const editionPrints = allCardPrints.filter(card => card.set === selectedEdition.set);
+        const editionLanguages = Array.from(new Set(editionPrints.map(card => card.lang)));
+        setAvailableLanguages(editionLanguages);
+
+        // Si el idioma actual no está disponible o no hay ninguno, seleccionar uno por defecto
+        if (editionLanguages.length > 0 && !editionLanguages.includes(selectedLanguage)) {
+          const defaultLang = editionLanguages.includes('en') ? 'en' : (editionLanguages.includes(lang) ? lang : editionLanguages[0]);
+          setSelectedLanguage(defaultLang);
         }
-    };
-
-    fetchLanguagesForEdition();
-}, [selectedEditionId, selectedCardName]); // Removí 'lang' de las dependencias
+    }
+  }, [selectedEditionId, allCardPrints, cardEditions, lang, selectedLanguage]);
 
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setSearchQuery(value);
-        if (selectedCardName && value !== selectedCardName) {
-            setSelectedCardName(null);
-            // Reset dependent fields when the user starts typing a new query
-            setCardEditions([]);
-            setSelectedEditionId('');
-            setAvailableLanguages([]);
-            setSelectedLanguage('');
-            setAvailableFinishes([]);
-            setSelectedFinish('');
-            setMarketPrice(null);
-            setSelectedCardImage('/card-back.png');
-        }
-        setActiveSuggestion(-1);
-    };
+  /* ---------- Actualizar imagen/precio cuando cambia el idioma (si existe la versión) ---------- */
+  useEffect(() => {
+    if (!selectedLanguage || !selectedEditionId || allCardPrints.length === 0) return;
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (suggestions.length > 0) {
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                setActiveSuggestion(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                setActiveSuggestion(prev => (prev > 0 ? prev - 1 : prev));
-            } else if (e.key === 'Enter' && activeSuggestion > -1) {
-                e.preventDefault();
-                handleSuggestionClick(suggestions[activeSuggestion]);
-            } else if (e.key === 'Escape') {
-                setSuggestions([]);
-            }
-        }
-    };
+    const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
+    if (!selectedEdition) return;
 
-    const handleSuggestionClick = async (suggestion: string) => {
-        setSuggestions([]); // Mover al inicio para evitar el parpadeo
-        setSearchQuery(suggestion);
-        setSelectedCardName(suggestion);
-        setIsFetchingEditions(true);
-        
-        // Reset dependent fields
-        setSelectedEditionId('');
-        setMarketPrice(null);
-        setAvailableLanguages([]);
-        setSelectedLanguage('');
-        setAvailableFinishes([]);
-        setSelectedFinish('');
-        setCardEditions([]);
-
-        try {
-            const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(suggestion)}"&unique=prints&include_multilingual=true`);
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch card editions');
-            }
-            
-            const data = await response.json();
-            
-            const allPrints: ScryfallCard[] = data.data.filter((card: any) => !card.digital);
-            
-            const allFinishes = [...new Set(allPrints.flatMap(p => p.finishes))];
-            setAvailableFinishes(allFinishes);
-            if (allFinishes.length > 0) {
-                setSelectedFinish(allFinishes.includes('nonfoil') ? 'nonfoil' : allFinishes[0]);
-            }
-            
-            // Agrupar por set para mostrar solo ediciones únicas
-            const uniqueEditions = allPrints.reduce((acc, print) => {
-                if (!acc.find(p => p.set === print.set)) {
-                    // Tomar la versión en inglés si está disponible, sino la primera
-                    const englishVersion = allPrints.find(p => p.set === print.set && p.lang === 'en');
-                    acc.push(englishVersion || print);
-                }
-                return acc;
-            }, [] as ScryfallCard[]);
-
-            uniqueEditions.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
-            setCardEditions(uniqueEditions);
-
-        } catch (error) {
-            console.error(error);
-            setCardEditions([]);
-            setAvailableLanguages([]);
-        } finally {
-            setIsFetchingEditions(false);
-            setSuggestions([]); // Asegurar que se mantengan vacías
-        }
-    };
-    
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-          if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
-            setSuggestions([]);
-          }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-          document.removeEventListener("mousedown", handleClickOutside);
-        };
-      }, [suggestionsRef]);
-
-
-    return (
-        <div className="container mx-auto max-w-4xl px-4 py-8">
-            <h1 className="text-4xl font-bold font-headline mb-2">{t.title}</h1>
-            <p className="text-muted-foreground mb-8">{t.description}</p>
-
-            <form className="space-y-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t.step1Title}</CardTitle>
-                        <CardDescription>{t.step1Description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="md:col-span-2 space-y-6">
-                            <div className="space-y-2 relative">
-                                <Label htmlFor="card-search">{t.step1SearchLabel}</Label>
-                                <Input
-                                    id="card-search"
-                                    placeholder={t.step1SearchPlaceholder}
-                                    value={searchQuery}
-                                    onChange={handleSearchChange}
-                                    onKeyDown={handleKeyDown}
-                                    autoComplete="off"
-                                    disabled={isFetchingEditions}
-                                />
-                                {suggestions.length > 0 && (
-                                    <ul ref={suggestionsRef} className="absolute z-20 w-full bg-card border border-border rounded-md mt-1 shadow-lg">
-                                        {suggestions.map((suggestion, index) => (
-                                            <li
-                                                key={suggestion}
-                                                className={cn(
-                                                    "px-3 py-2 cursor-pointer hover:bg-muted",
-                                                    index === activeSuggestion && "bg-muted"
-                                                )}
-                                                onClick={() => handleSuggestionClick(suggestion)}
-                                            >
-                                                {suggestion}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="edition">{t.editionLabel}</Label>
-                                    <Select
-                                        disabled={!selectedCardName || isFetchingEditions || cardEditions.length === 0}
-                                        value={selectedEditionId}
-                                        onValueChange={setSelectedEditionId}
-                                    >
-                                        <SelectTrigger id="edition" className='w-full'>
-                                            <SelectValue placeholder={
-                                                isFetchingEditions ? "Cargando..." : (cardEditions.length === 0 && selectedCardName ? "No se encontraron ediciones" : t.selectEdition)
-                                            }>
-                                                {isFetchingEditions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                {selectedEditionId ? cardEditions.find(e => e.id === selectedEditionId)?.set_name : (isFetchingEditions ? "Cargando..." : t.selectEdition)}
-                                            </SelectValue>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {cardEditions.map((edition) => {
-                                                const variantInfo = getVariantInfo(edition);
-                                                return (
-                                                <SelectItem key={edition.id} value={edition.id}>
-                                                    {edition.set_name} {variantInfo}
-                                                </SelectItem>
-                                                )
-                                            })}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                <Label htmlFor="condition">{t.conditionLabel}</Label>
-                                    <Select>
-                                        <SelectTrigger id="condition">
-                                            <SelectValue placeholder={t.selectCondition} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {(Object.keys(t.conditions) as Array<keyof typeof t.conditions>).map((key) => (
-                                                <SelectItem key={key} value={key}>
-                                                <div className="flex items-center">
-                                                    <span className="font-bold w-10 text-left">{key}</span>
-                                                    <span className="mx-2">-</span>
-                                                    <span>{t.conditions[key].split(' - ')[1]}</span>
-                                                </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                             <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="quantity">{t.quantityLabel}</Label>
-                                    <Input id="quantity" type="number" defaultValue="1" min="1" />
-                                </div>
-                            </div>
-                        </div>
-                         <div className="md:col-span-1 flex items-center justify-center">
-                           <div className="aspect-[3/4] w-full max-w-[250px] relative">
-                             <Image
-                                src={selectedCardImage}
-                                alt="Selected card"
-                                layout="fill"
-                                objectFit="contain"
-                                className="rounded-xl shadow-lg"
-                              />
-                           </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t.step2Title}</CardTitle>
-                        <CardDescription>
-                            {selectedCardName ? 
-                                t.step2DescriptionSelected.replace('{cardName}', selectedCardName) : 
-                                t.step2Description
-                            }
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="price">{t.priceLabel}</Label>
-                            <Input id="price" type="number" placeholder={t.pricePlaceholder} />
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                <HelpCircle className="w-3 h-3"/>
-                                {marketPrice 
-                                    ? t.marketPrice.replace('{price}', marketPrice) 
-                                    : (selectedCardName ? 'No market price available.' : 'Select a card to see market price.')
-                                }
-                            </p>
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="language">{t.languageLabel}</Label>
-                             <Select
-                                disabled={availableLanguages.length === 0}
-                                value={selectedLanguage}
-                                onValueChange={setSelectedLanguage}
-                            >
-                                <SelectTrigger id="language">
-                                    <SelectValue placeholder={t.selectLanguage} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {availableLanguages.map((langKey) => (
-                                        <SelectItem key={langKey} value={langKey}>
-                                            {t.languages[langKey as keyof typeof t.languages] || langKey}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="foil">{t.foilLabel}</Label>
-                            <Select 
-                                disabled={availableFinishes.length === 0}
-                                value={selectedFinish}
-                                onValueChange={setSelectedFinish}
-                            >
-                                <SelectTrigger id="foil">
-                                    <SelectValue placeholder={t.selectFoil} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {availableFinishes.map((finish) => (
-                                        <SelectItem key={finish} value={finish}>
-                                            {t.foils[finish as keyof typeof t.foils] || finish}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-2 md:col-span-2">
-                            <Label>{t.imagesLabel}</Label>
-                            <div className="flex gap-4">
-                                <Button variant="outline" className="w-1/2 h-32 flex flex-col items-center justify-center gap-2">
-                                    <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                                    <span>{t.frontImage}</span>
-                                </Button>
-                                <Button variant="outline" className="w-1/2 h-32 flex flex-col items-center justify-center gap-2">
-                                    <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                                    <span>{t.backImage}</span>
-                                </Button>
-                            </div>
-                        </div>
-                        
-                        <div className="space-y-2 md:col-span-2">
-                            <Label htmlFor="comments">{t.commentsLabel}</Label>
-                            <Textarea id="comments" placeholder={t.commentsPlaceholder} />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <div className="flex justify-end">
-                    <Button type="submit" size="lg" className="bg-accent hover:bg-accent/80 text-accent-foreground" disabled={listingLimitReached}>
-                        {listingLimitReached ? t.listingLimitReached : t.publishListing}
-                    </Button>
-                </div>
-            </form>
-        </div>
+    // Buscar si existe una impresión de esta carta en el set y el idioma seleccionados
+    const cardInSelectedLanguage = allCardPrints.find(
+      card => card.set === selectedEdition.set && card.lang === selectedLanguage
     );
+
+    if (cardInSelectedLanguage) {
+      if (cardInSelectedLanguage.image_uris?.large) setSelectedCardImage(cardInSelectedLanguage.image_uris.large);
+      // Actualizar el precio si la versión en otro idioma tiene uno diferente
+      const price = cardInSelectedLanguage.prices?.usd || cardInSelectedLanguage.prices?.usd_foil || cardInSelectedLanguage.prices?.usd_etched;
+      setMarketPrice(price || null);
+    }
+  }, [selectedLanguage, selectedEditionId, allCardPrints, cardEditions]);
+
+
+  /* ---------- Seleccionar por defecto la edición cuando cardEditions cambia (fallback) ---------- */
+  useEffect(() => {
+    if (cardEditions.length > 0 && !selectedEditionId) {
+      setSelectedEditionId(cardEditions[0].id);
+    }
+  }, [cardEditions, selectedEditionId]);
+
+
+  /* ---------- Input handlers ---------- */
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    if (selectedCardName && value !== selectedCardName) {
+      // resetear todo si el usuario cambia el nombre de la carta
+      setSelectedCardName(null);
+      setCardEditions([]);
+      setAllCardPrints([]);
+      setSelectedEditionId('');
+      setAvailableLanguages([]);
+      setSelectedLanguage('');
+      setAvailableFinishes([]);
+      setSelectedFinish('');
+      setMarketPrice(null);
+      setSelectedCardImage('/card-back.png');
+    }
+    setActiveSuggestion(-1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (suggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSuggestion(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestion(prev => (prev > 0 ? prev - 1 : prev));
+    } else if (e.key === 'Enter' && activeSuggestion > -1) {
+      e.preventDefault();
+      handleSuggestionClick(suggestions[activeSuggestion]);
+    } else if (e.key === 'Escape') {
+      setSuggestions([]);
+    }
+  };
+
+  /* ---------- Al seleccionar una sugerencia: UNICA llamada a API ---------- */
+  const handleSuggestionClick = async (suggestion: string) => {
+    setSuggestions([]);
+    setSearchQuery(suggestion);
+    setSelectedCardName(suggestion);
+    setIsFetchingEditions(true);
+
+    // resetear estados dependientes
+    setSelectedEditionId('');
+    setMarketPrice(null);
+    setAvailableLanguages([]);
+    setSelectedLanguage('');
+    setAvailableFinishes([]);
+    setSelectedFinish('');
+    setCardEditions([]);
+    setAllCardPrints([]);
+
+    try {
+      // Unica llamada a la API para obtener todas las impresiones, incluyendo todos los idiomas
+      const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(suggestion)}"&unique=prints&include_multilingual=true`);
+      if (!response.ok) throw new Error('Failed to fetch card editions');
+      const data = await response.json();
+
+      const allPrints: ScryfallCard[] = data.data.filter((card: any) => !card.digital);
+      setAllCardPrints(allPrints); // Guardar todas las impresiones para uso futuro (cambio de idioma/edición)
+
+      const allFinishes = Array.from(new Set(allPrints.flatMap(p => p.finishes || [])));
+      setAvailableFinishes(allFinishes);
+      if (allFinishes.length > 0) {
+        setSelectedFinish(allFinishes.includes('nonfoil') ? 'nonfoil' : allFinishes[0]);
+      }
+
+      // Agrupar por set para mostrar una edición por set (tomando la versión en inglés si existe)
+      const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], print) => {
+        if (!acc.find(p => p.set === print.set)) {
+          const englishVersion = allPrints.find(p => p.set === print.set && p.lang === 'en');
+          acc.push(englishVersion || print);
+        }
+        return acc;
+      }, []);
+
+      uniqueEditions.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
+
+      setCardEditions(uniqueEditions);
+
+      // Pre-seleccionar la primera edición para que los demás useEffect se disparen
+      if (uniqueEditions.length > 0) {
+        setSelectedEditionId(uniqueEditions[0].id);
+      }
+
+    } catch (error) {
+      console.error(error);
+      // Reseteo completo en caso de error
+      setCardEditions([]);
+      setAllCardPrints([]);
+      setAvailableLanguages([]);
+    } finally {
+      setIsFetchingEditions(false);
+      setSuggestions([]);
+    }
+  };
+
+  /* ---------- Click fuera de sugerencias ---------- */
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setSuggestions([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [suggestionsRef]);
+
+  return (
+    <div className="container mx-auto max-w-4xl px-4 py-8">
+      <h1 className="text-4xl font-bold font-headline mb-2">{t.title}</h1>
+      <p className="text-muted-foreground mb-8">{t.description}</p>
+
+      <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.step1Title}</CardTitle>
+            <CardDescription>{t.step1Description}</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2 space-y-6">
+              <div className="space-y-2 relative">
+                <Label htmlFor="card-search">{t.step1SearchLabel}</Label>
+                <Input
+                  id="card-search"
+                  placeholder={t.step1SearchPlaceholder}
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleKeyDown}
+                  autoComplete="off"
+                  disabled={isFetchingEditions}
+                />
+                {isFetchingEditions && <Loader2 className="absolute right-3 top-9 h-5 w-5 animate-spin" />}
+                {suggestions.length > 0 && (
+                  <ul ref={suggestionsRef} className="absolute z-20 w-full bg-card border border-border rounded-md mt-1 shadow-lg">
+                    {suggestions.map((suggestion, index) => (
+                      <li
+                        key={suggestion + index}
+                        className={cn(
+                          "px-3 py-2 cursor-pointer hover:bg-muted",
+                          index === activeSuggestion && "bg-muted"
+                        )}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                      >
+                        {suggestion}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="edition">{t.editionLabel}</Label>
+                  <Select
+                    disabled={!selectedCardName || isFetchingEditions || cardEditions.length === 0}
+                    value={selectedEditionId}
+                    onValueChange={setSelectedEditionId}>
+                    <SelectTrigger id="edition">
+                      <SelectValue placeholder={
+                        isFetchingEditions ? "Cargando..." : (cardEditions.length === 0 && selectedCardName ? "No se encontraron ediciones" : t.selectEdition)
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cardEditions.map((edition) => {
+                        const variantInfo = getVariantInfo(edition);
+                        return (
+                          <SelectItem key={edition.id} value={edition.id}>
+                            {edition.set_name} {variantInfo}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="language">{t.languageLabel}</Label>
+                  <Select
+                    disabled={availableLanguages.length === 0}
+                    value={selectedLanguage}
+                    onValueChange={setSelectedLanguage}>
+                    <SelectTrigger id="language">
+                      <SelectValue placeholder={t.selectLanguage} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableLanguages.map((langKey) => (
+                        <SelectItem key={langKey} value={langKey}>
+                          {t.languages[langKey as keyof typeof t.languages] || langKey}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="condition">{t.conditionLabel}</Label>
+                  <Select>
+                    <SelectTrigger id="condition">
+                      <SelectValue placeholder={t.selectCondition} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(t.conditions) as Array<keyof typeof t.conditions>).map((key) => (
+                        <SelectItem key={key} value={key}>
+                          <div className="flex items-center">
+                            <span className="font-bold w-10 text-left">{key}</span>
+                            <span className="mx-2">-</span>
+                            <span>{t.conditions[key].split(' - ')[1]}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="quantity">{t.quantityLabel}</Label>
+                  <Input id="quantity" type="number" defaultValue={1} min={1} />
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-1 flex items-center justify-center">
+              <div className="aspect-[3/4] w-full max-w-[250px] relative">
+                <Image
+                  src={selectedCardImage}
+                  alt="Selected card"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  className="rounded-xl shadow-lg"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.step2Title}</CardTitle>
+            <CardDescription>
+              {selectedCardName ?
+                t.step2DescriptionSelected.replace('{cardName}', selectedCardName) :
+                t.step2Description
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="price">{t.priceLabel}</Label>
+              <Input id="price" type="number" placeholder={t.pricePlaceholder} />
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <HelpCircle className="w-3 h-3" />
+                {marketPrice ? (
+                  <>
+                    Precio de mercado de referencia: $ {marketPrice} (USD)
+                  </>
+                ) : (selectedCardName ? 'Precio no disponible.' : 'Selecciona una carta para ver precio.')}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="foil">{t.foilLabel}</Label>
+              <Select
+                disabled={availableFinishes.length === 0}
+                value={selectedFinish}
+                onValueChange={setSelectedFinish}
+              >
+                <SelectTrigger id="foil">
+                  <SelectValue placeholder={t.selectFoil} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableFinishes.map((finish) => (
+                    <SelectItem key={finish} value={finish}>
+                      {t.foils[finish as keyof typeof t.foils] || finish}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label>{t.imagesLabel}</Label>
+              <div className="flex gap-4">
+                <Button variant="outline" className="w-1/2 h-32 flex flex-col items-center justify-center gap-2">
+                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                  <span>{t.frontImage}</span>
+                </Button>
+                <Button variant="outline" className="w-1/2 h-32 flex flex-col items-center justify-center gap-2">
+                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                  <span>{t.backImage}</span>
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="comments">{t.commentsLabel}</Label>
+              <Textarea id="comments" placeholder={t.commentsPlaceholder} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end">
+          <Button type="submit" size="lg" className="bg-accent hover:bg-accent/80 text-accent-foreground" disabled={listingLimitReached}>
+            {listingLimitReached ? t.listingLimitReached : t.publishListing}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
 }
-    
-    
-
 
     
-
-    
-
-
-
-
-    
-
-    
-
-
-
