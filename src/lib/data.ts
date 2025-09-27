@@ -36,6 +36,3 @@ export async function getCardListings(): Promise<CardListing[]> {
     return []; // Return an empty array on error
   }
 }
-
-// Kept for reference or if you need to switch back to mock data quickly.
-export const cardListings: CardListing[] = [];
