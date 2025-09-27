@@ -36,14 +36,21 @@ type ScryfallCard = {
     finishes: string[];
     border_color: string;
     frame_effects?: string[];
+    frame: string; // e.g., '2015', '1997' (retro)
+    promo_types?: string[];
+    full_art: boolean;
 };
 
 function getVariantInfo(card: ScryfallCard) {
-    const parts = [];
-    if (card.frame_effects?.includes('showcase')) parts.push('Showcase');
-    if (card.border_color === 'borderless') parts.push('Borderless');
-    if (card.frame_effects?.includes('extendedart')) parts.push('Extended Art');
-    return parts.length > 0 ? `(${parts.join(', ')})` : '';
+    const parts = new Set<string>();
+    if (card.frame_effects?.includes('showcase')) parts.add('Showcase');
+    if (card.border_color === 'borderless') parts.add('Borderless');
+    if (card.frame_effects?.includes('extendedart')) parts.add('Extended Art');
+    if (card.frame === '1997' || card.promo_types?.includes('retroframe')) parts.add('Retro Frame');
+    if (card.full_art) parts.add('Full Art');
+    
+    const partsArray = Array.from(parts);
+    return partsArray.length > 0 ? `(${partsArray.join(', ')})` : '';
 }
 
 
@@ -416,3 +423,4 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     
 
     
+
