@@ -12,6 +12,7 @@ import { HelpCircle, Image as ImageIcon } from "lucide-react";
 import { Locale } from "@/i18n-config";
 import { cn } from '@/lib/utils';
 import { getDictionary } from '@/lib/dictionaries';
+import { Dictionary } from '@/lib/definitions';
 
 
 // This would ideally come from a comprehensive database fetched from an API
@@ -30,7 +31,7 @@ const MOCK_CARD_NAMES = [
 
 
 type CreateListingClientPageProps = {
-    t: any; // Using 'any' to avoid server-only import issues in client component
+    t: Dictionary['createListing'];
     lang: Locale;
 };
 
@@ -266,5 +267,3 @@ export default async function CreateListingPage({ params: { lang } }: { params: 
         </Suspense>
     );
 }
-
-    

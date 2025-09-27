@@ -24,9 +24,10 @@ import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { Locale } from '@/i18n-config';
 import { cn } from '@/lib/utils';
+import { Dictionary } from '@/lib/definitions';
 
 type AuthFormProps = {
-  t: any;
+  t: Dictionary['auth'];
   lang: Locale;
 };
 
@@ -358,5 +359,3 @@ export function AuthForm({ t, lang }: AuthFormProps) {
     </Card>
   );
 }
-
-    

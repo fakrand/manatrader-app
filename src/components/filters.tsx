@@ -21,12 +21,13 @@ import { ManaSymbol } from './mana-symbol';
 import { cn } from '@/lib/utils';
 import { fetchSmartFilters } from '@/app/actions';
 import { Locale } from '@/i18n-config';
+import { Dictionary } from '@/lib/definitions';
 
 const conditions = ['NM', 'LP', 'MP', 'HP', 'DMG'];
 const languages = ['English', 'Spanish', 'Japanese'];
 const colors: ('W' | 'U' | 'B' | 'R' | 'G')[] = ['W', 'U', 'B', 'R', 'G'];
 
-export function Filters({ lang, dict }: { lang: Locale, dict: any }) {
+export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary['home']['filters'] }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -189,5 +190,3 @@ export function Filters({ lang, dict }: { lang: Locale, dict: any }) {
     </div>
   );
 }
-
-    
