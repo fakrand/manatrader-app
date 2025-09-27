@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,8 +14,6 @@ import { Locale } from "@/i18n-config";
 import { cn } from '@/lib/utils';
 import { Dictionary } from '@/lib/definitions';
 
-
-// This would ideally come from a comprehensive database fetched from an API
 const MOCK_CARD_NAMES = [
     "Sol Ring",
     "Swords to Plowshares",
@@ -34,6 +33,9 @@ type ScryfallCard = {
     set: string;
     set_name: string;
     digital: boolean;
+    image_uris?: {
+        large: string;
+    };
 };
 
 export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'], lang: Locale }) {
@@ -42,10 +44,11 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     const [searchQuery, setSearchQuery] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [activeSuggestion, setActiveSuggestion] = useState(-1);
-    const [selectedCard, setSelectedCard] = useState<string | null>(null);
+    const [selectedCardName, setSelectedCardName] = useState<string | null>(null);
     const [cardEditions, setCardEditions] = useState<ScryfallCard[]>([]);
     const [isFetchingEditions, setIsFetchingEditions] = useState(false);
-    const [selectedEdition, setSelectedEdition] = useState<string>('');
+    const [selectedEditionId, setSelectedEditionId] = useState<string>('');
+    const [selectedCardImage, setSelectedCardImage] = useState<string>('/card-back.png');
 
     const suggestionsRef = useRef<HTMLUListElement>(null);
 
@@ -56,12 +59,24 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         );
     }, [searchQuery]);
 
+    useEffect(() => {
+        if (selectedEditionId) {
+            const edition = cardEditions.find(e => e.id === selectedEditionId);
+            if (edition && edition.image_uris) {
+                setSelectedCardImage(edition.image_uris.large);
+            }
+        } else {
+            setSelectedCardImage('/card-back.png');
+        }
+    }, [selectedEditionId, cardEditions]);
+    
+
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchQuery(value);
-        setSelectedCard(null);
-        setCardEditions([]); // Reset editions when search changes
-        setSelectedEdition('');
+        setSelectedCardName(null);
+        setCardEditions([]);
+        setSelectedEditionId('');
         if (value) {
             setSuggestions(filteredSuggestions);
         } else {
@@ -89,15 +104,13 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
 
     const handleSuggestionClick = async (suggestion: string) => {
         setSearchQuery(suggestion);
-        setSelectedCard(suggestion);
+        setSelectedCardName(suggestion);
         setSuggestions([]);
         setIsFetchingEditions(true);
-        setSelectedEdition('');
+        setSelectedEditionId('');
         
         try {
-            // Use encodeURIComponent to safely handle card names with special characters
-            const encodedCardName = encodeURIComponent(suggestion);
-            const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=${encodedCardName}`);
+            const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=!%22${encodeURIComponent(suggestion)}%22`);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch card editions');
@@ -106,20 +119,21 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             const data = await response.json();
             
             const editions: ScryfallCard[] = data.data
-                .filter((card: ScryfallCard) => !card.digital) // Exclude digital-only sets
+                .filter((card: ScryfallCard) => !card.digital)
                 .map((card: ScryfallCard) => ({
                     id: card.id,
                     name: card.name,
                     set: card.set,
                     set_name: card.set_name,
-                    digital: card.digital
+                    digital: card.digital,
+                    image_uris: card.image_uris,
                 }));
 
             setCardEditions(editions);
 
         } catch (error) {
             console.error(error);
-            setCardEditions([]); // Clear editions on error
+            setCardEditions([]);
         } finally {
             setIsFetchingEditions(false);
         }
@@ -149,57 +163,71 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                         <CardTitle>{t.step1Title}</CardTitle>
                         <CardDescription>{t.step1Description}</CardDescription>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2 relative">
-                            <Label htmlFor="card-search">{t.step1SearchLabel}</Label>
-                            <Input
-                                id="card-search"
-                                placeholder={t.step1SearchPlaceholder}
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                onKeyDown={handleKeyDown}
-                                autoComplete="off"
-                            />
-                            {suggestions.length > 0 && (
-                                <ul ref={suggestionsRef} className="absolute z-10 w-full bg-card border border-border rounded-md mt-1 shadow-lg">
-                                    {suggestions.map((suggestion, index) => (
-                                        <li
-                                            key={suggestion}
-                                            className={cn(
-                                                "px-3 py-2 cursor-pointer hover:bg-muted",
-                                                index === activeSuggestion && "bg-muted"
-                                            )}
-                                            onClick={() => handleSuggestionClick(suggestion)}
-                                        >
-                                            {suggestion}
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                    <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="md:col-span-2 space-y-6">
+                            <div className="space-y-2 relative">
+                                <Label htmlFor="card-search">{t.step1SearchLabel}</Label>
+                                <Input
+                                    id="card-search"
+                                    placeholder={t.step1SearchPlaceholder}
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    onKeyDown={handleKeyDown}
+                                    autoComplete="off"
+                                    disabled={isFetchingEditions}
+                                />
+                                {suggestions.length > 0 && (
+                                    <ul ref={suggestionsRef} className="absolute z-20 w-full bg-card border border-border rounded-md mt-1 shadow-lg">
+                                        {suggestions.map((suggestion, index) => (
+                                            <li
+                                                key={suggestion}
+                                                className={cn(
+                                                    "px-3 py-2 cursor-pointer hover:bg-muted",
+                                                    index === activeSuggestion && "bg-muted"
+                                                )}
+                                                onClick={() => handleSuggestionClick(suggestion)}
+                                            >
+                                                {suggestion}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edition">{t.editionLabel}</Label>
+                                <Select
+                                    disabled={!selectedCardName || isFetchingEditions || cardEditions.length === 0}
+                                    value={selectedEditionId}
+                                    onValueChange={setSelectedEditionId}
+                                >
+                                    <SelectTrigger id="edition" className='w-full'>
+                                        <SelectValue placeholder={
+                                            isFetchingEditions ? "Cargando..." : (cardEditions.length === 0 && selectedCardName ? "No se encontraron ediciones" : t.selectEdition)
+                                        }>
+                                            {isFetchingEditions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            {selectedEditionId ? cardEditions.find(e => e.id === selectedEditionId)?.set_name : (isFetchingEditions ? "Cargando..." : t.selectEdition)}
+                                        </SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {cardEditions.map((edition) => (
+                                            <SelectItem key={edition.id} value={edition.id}>
+                                                {edition.set_name} ({edition.set.toUpperCase()})
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="edition">{t.editionLabel}</Label>
-                            <Select
-                                disabled={!selectedCard || isFetchingEditions}
-                                value={selectedEdition}
-                                onValueChange={setSelectedEdition}
-                            >
-                                <SelectTrigger id="edition">
-                                    <SelectValue placeholder={
-                                        isFetchingEditions ? "Cargando..." : t.selectEdition
-                                    }>
-                                        {isFetchingEditions ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                        {selectedEdition ? cardEditions.find(e => e.id === selectedEdition)?.set_name : (isFetchingEditions ? "Cargando..." : t.selectEdition)}
-                                    </SelectValue>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {cardEditions.map((edition) => (
-                                         <SelectItem key={edition.id} value={edition.id}>
-                                            {edition.set_name} ({edition.set.toUpperCase()})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                         <div className="md:col-span-1 flex items-center justify-center">
+                           <div className="aspect-[3/4] w-full max-w-[250px] relative">
+                             <Image
+                                src={selectedCardImage}
+                                alt="Selected card"
+                                layout="fill"
+                                objectFit="contain"
+                                className="rounded-xl shadow-lg"
+                              />
+                           </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -208,8 +236,8 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                     <CardHeader>
                         <CardTitle>{t.step2Title}</CardTitle>
                         <CardDescription>
-                            {selectedCard ? 
-                                t.step2DescriptionSelected.replace('{cardName}', selectedCard) : 
+                            {selectedCardName ? 
+                                t.step2DescriptionSelected.replace('{cardName}', selectedCardName) : 
                                 t.step2Description
                             }
                         </CardDescription>
@@ -243,7 +271,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="language">{t.languageLabel}</Label>
-                            <Select disabled={!selectedCard}>
+                            <Select disabled={!selectedCardName}>
                                 <SelectTrigger id="language">
                                     <SelectValue placeholder={t.selectLanguage} />
                                 </SelectTrigger>
@@ -258,7 +286,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="foil">{t.foilLabel}</Label>
-                            <Select disabled={!selectedCard}>
+                            <Select disabled={!selectedCardName}>
                                 <SelectTrigger id="foil">
                                     <SelectValue placeholder={t.selectFoil} />
                                 </SelectTrigger>
@@ -301,3 +329,5 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         </div>
     );
 }
+
+    
