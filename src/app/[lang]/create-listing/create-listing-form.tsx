@@ -219,10 +219,6 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                             </div>
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="quantity">{t.quantityLabel}</Label>
-                                    <Input id="quantity" type="number" defaultValue="1" />
-                                </div>
-                                <div className="space-y-2">
                                     <Label htmlFor="condition">{t.conditionLabel}</Label>
                                     <Select>
                                         <SelectTrigger id="condition">
@@ -236,6 +232,10 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                             <SelectItem value="DMG">{t.conditions.DMG}</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="quantity">{t.quantityLabel}</Label>
+                                    <Input id="quantity" type="number" defaultValue="1" min="1" />
                                 </div>
                             </div>
                         </div>
