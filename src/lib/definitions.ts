@@ -105,11 +105,24 @@ export type Dictionary = {
     languageLabel: string;
     selectLanguage: string;
     languages: {
+      [key: string]: string;
       en: string;
       es: string;
-      jp: string;
-      de: string;
       fr: string;
+      de: string;
+      it: string;
+      pt: string;
+      jp: string;
+      ko: string;
+      ru: string;
+      zhs: string;
+      zht: string;
+      he: string;
+      la: string;
+      grc: string;
+      ar: string;
+      sa: string;
+      px: string;
     };
     foilLabel: string;
     selectFoil: string;

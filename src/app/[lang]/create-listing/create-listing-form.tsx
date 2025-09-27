@@ -33,6 +33,7 @@ type ScryfallCard = {
     set: string;
     set_name: string;
     digital: boolean;
+    lang: string;
     image_uris?: {
         large: string;
     };
@@ -54,6 +55,8 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     const [selectedEditionId, setSelectedEditionId] = useState<string>('');
     const [selectedCardImage, setSelectedCardImage] = useState<string>('/card-back.png');
     const [marketPrice, setMarketPrice] = useState<string | null>(null);
+    const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('');
 
     const suggestionsRef = useRef<HTMLUListElement>(null);
 
@@ -87,6 +90,8 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         setSelectedCardName(null);
         setCardEditions([]);
         setSelectedEditionId('');
+        setAvailableLanguages([]);
+        setSelectedLanguage('');
         if (value) {
             setSuggestions(filteredSuggestions);
         } else {
@@ -119,6 +124,8 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         setIsFetchingEditions(true);
         setSelectedEditionId('');
         setMarketPrice(null);
+        setAvailableLanguages([]);
+        setSelectedLanguage('');
         
         try {
             const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=%21"${encodeURIComponent(suggestion)}"`);
@@ -129,23 +136,27 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             
             const data = await response.json();
             
-            const editions: ScryfallCard[] = data.data
-                .filter((card: ScryfallCard) => !card.digital)
-                .map((card: ScryfallCard) => ({
-                    id: card.id,
-                    name: card.name,
-                    set: card.set,
-                    set_name: card.set_name,
-                    digital: card.digital,
-                    image_uris: card.image_uris,
-                    prices: card.prices,
-                }));
+            const allPrints: ScryfallCard[] = data.data.filter((card: any) => !card.digital);
 
-            setCardEditions(editions);
+            const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], current) => {
+                if (!acc.some(item => item.set === current.set)) {
+                    acc.push(current);
+                }
+                return acc;
+            }, []);
+
+            const uniqueLanguages = [...new Set(allPrints.map(card => card.lang))];
+            setAvailableLanguages(uniqueLanguages);
+            if (uniqueLanguages.length > 0) {
+                setSelectedLanguage(uniqueLanguages.includes(lang) ? lang : uniqueLanguages[0]);
+            }
+
+            setCardEditions(uniqueEditions);
 
         } catch (error) {
             console.error(error);
             setCardEditions([]);
+            setAvailableLanguages([]);
         } finally {
             setIsFetchingEditions(false);
         }
@@ -293,16 +304,20 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="language">{t.languageLabel}</Label>
-                            <Select disabled={!selectedCardName}>
+                             <Select
+                                disabled={availableLanguages.length === 0}
+                                value={selectedLanguage}
+                                onValueChange={setSelectedLanguage}
+                            >
                                 <SelectTrigger id="language">
                                     <SelectValue placeholder={t.selectLanguage} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="en">{t.languages.en}</SelectItem>
-                                    <SelectItem value="es">{t.languages.es}</SelectItem>
-                                    <SelectItem value="jp">{t.languages.jp}</SelectItem>
-                                    <SelectItem value="de">{t.languages.de}</SelectItem>
-                                    <SelectItem value="fr">{t.languages.fr}</SelectItem>
+                                    {availableLanguages.map((langKey) => (
+                                        <SelectItem key={langKey} value={langKey}>
+                                            {t.languages[langKey as keyof typeof t.languages] || langKey}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>

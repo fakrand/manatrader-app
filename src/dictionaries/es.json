@@ -103,9 +103,21 @@
     "languages": {
       "en": "Inglés",
       "es": "Español",
-      "jp": "Japonés",
+      "fr": "Francés",
       "de": "Alemán",
-      "fr": "Francés"
+      "it": "Italiano",
+      "pt": "Portugués",
+      "jp": "Japonés",
+      "ko": "Coreano",
+      "ru": "Ruso",
+      "zhs": "Chino Simplificado",
+      "zht": "Chino Tradicional",
+      "he": "Hebreo",
+      "la": "Latín",
+      "grc": "Griego Antiguo",
+      "ar": "Árabe",
+      "sa": "Sánscrito",
+      "px": "Phyrexiano"
     },
     "foilLabel": "Tipo de Foil",
     "selectFoil": "Selecciona el tipo de foil",
