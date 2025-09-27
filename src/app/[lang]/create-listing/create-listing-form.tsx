@@ -34,6 +34,7 @@ type ScryfallCard = {
     set_name: string;
     digital: boolean;
     lang: string;
+    released_at: string;
     image_uris?: {
         large: string;
     };
@@ -137,6 +138,9 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             const data = await response.json();
             
             const allPrints: ScryfallCard[] = data.data.filter((card: any) => !card.digital);
+            
+            // Sort by release date
+            allPrints.sort((a, b) => new Date(a.released_at).getTime() - new Date(b.released_at).getTime());
 
             const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], current) => {
                 if (!acc.some(item => item.set === current.set)) {
@@ -241,7 +245,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                 </Select>
                             </div>
                             <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-2">
+                               <div className="space-y-2">
                                     <Label htmlFor="condition">{t.conditionLabel}</Label>
                                     <Select>
                                         <SelectTrigger id="condition">
@@ -251,7 +255,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                             {(Object.keys(t.conditions) as Array<keyof typeof t.conditions>).map((key) => (
                                                 <SelectItem key={key} value={key}>
                                                 <div className="flex items-center w-full">
-                                                    <span className="font-bold w-12 text-left">{key}</span>
+                                                    <span className="font-bold w-10 text-left">{key}</span>
                                                     <span className="mx-2">-</span>
                                                     <span>{t.conditions[key].split(' - ')[1]}</span>
                                                 </div>
@@ -366,3 +370,5 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         </div>
     );
 }
+
+    
