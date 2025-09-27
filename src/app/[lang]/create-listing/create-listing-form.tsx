@@ -114,35 +114,45 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     }, [selectedEditionId, cardEditions]);
     
     useEffect(() => {
-        const fetchLanguagesForEdition = async () => {
-            if (selectedEditionId && selectedCardName) {
-                const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
-                if (selectedEdition) {
-                    try {
-                        const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(selectedCardName)}" set:${selectedEdition.set}&include_multilingual=true`);
-                        const data = await response.json();
+    const fetchLanguagesForEdition = async () => {
+        if (selectedEditionId && selectedCardName) {
+            const selectedEdition = cardEditions.find(e => e.id === selectedEditionId);
+            if (selectedEdition) {
+                try {
+                    const response = await fetch(`https://api.scryfall.com/cards/search?q=%21"${encodeURIComponent(selectedCardName)}" set:${selectedEdition.set}`);
+                    const data = await response.json();
+                    
+                    if (data && data.data && data.data.length > 0) {
+                        const editionPrints = data.data.filter((card: any) => !card.digital);
+                        const editionLanguages = [...new Set(editionPrints.map((card: any) => card.lang))];
                         
-                        if (data.data) {
-                            const editionPrints = data.data.filter((card: any) => !card.digital);
-                            const editionLanguages = [...new Set(editionPrints.map((card: any) => card.lang))];
-                            setAvailableLanguages(editionLanguages);
-                            
-                            // Seleccionar inglés por defecto si está disponible
-                            const defaultLang = editionLanguages.includes('en') ? 'en' : 
-                                              (editionLanguages.includes(lang) ? lang : editionLanguages[0]);
+                        console.log('Languages found:', editionLanguages); // Para debug
+                        
+                        setAvailableLanguages(editionLanguages);
+                        
+                        // Seleccionar inglés por defecto si está disponible
+                        if (editionLanguages.length > 0) {
+                            const defaultLang = editionLanguages.includes('en') ? 'en' : editionLanguages[0];
                             setSelectedLanguage(defaultLang);
                         }
-                    } catch (error) {
-                        console.error('Error fetching languages for edition:', error);
-                        setAvailableLanguages(['en']);
-                        setSelectedLanguage('en');
+                    } else {
+                        // Fallback: usar el idioma de la edición seleccionada
+                        setAvailableLanguages([selectedEdition.lang]);
+                        setSelectedLanguage(selectedEdition.lang);
                     }
+                } catch (error) {
+                    console.error('Error fetching languages for edition:', error);
+                    // Fallback: usar el idioma de la edición seleccionada
+                    setAvailableLanguages([selectedEdition.lang]);
+                    setSelectedLanguage(selectedEdition.lang);
                 }
             }
-        };
+        }
+    };
 
-        fetchLanguagesForEdition();
-    }, [selectedEditionId, selectedCardName, lang]);
+    fetchLanguagesForEdition();
+}, [selectedEditionId, selectedCardName]); // Removí 'lang' de las dependencias
+
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -462,5 +472,6 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     
 
     
+
 
 
