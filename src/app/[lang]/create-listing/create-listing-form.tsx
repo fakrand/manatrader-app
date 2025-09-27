@@ -129,13 +129,16 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         setSelectedCardName(suggestion);
         setSuggestions([]);
         setIsFetchingEditions(true);
+        
+        // Reset dependent fields
         setSelectedEditionId('');
         setMarketPrice(null);
         setAvailableLanguages([]);
         setSelectedLanguage('');
         setAvailableFinishes([]);
         setSelectedFinish('');
-        
+        setCardEditions([]);
+
         try {
             const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=%21"${encodeURIComponent(suggestion)}"`);
             
@@ -150,7 +153,9 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             const uniqueLanguages = [...new Set(allPrints.map(card => card.lang))];
             setAvailableLanguages(uniqueLanguages);
             if (uniqueLanguages.length > 0) {
-                setSelectedLanguage(uniqueLanguages.includes(lang) ? lang : uniqueLanguages[0]);
+                 // Check if the app's current language is available for the card
+                const defaultLang = uniqueLanguages.includes(lang) ? lang : uniqueLanguages[0];
+                setSelectedLanguage(defaultLang);
             }
 
             const allFinishes = [...new Set(allPrints.flatMap(p => p.finishes))];
@@ -159,16 +164,16 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                 setSelectedFinish(allFinishes.includes('nonfoil') ? 'nonfoil' : allFinishes[0]);
             }
             
-            // Sort by release date
+            // Sort by release date DESC
             allPrints.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
 
+            // Reduce to unique sets, keeping the first one found (which will be the most recent print in that set)
             const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], current) => {
                 if (!acc.some(item => item.set === current.set)) {
                     acc.push(current);
                 }
                 return acc;
             }, []);
-
 
             setCardEditions(uniqueEditions);
 
