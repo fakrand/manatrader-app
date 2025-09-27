@@ -1,9 +1,46 @@
 
 import { getDictionary } from '@/lib/dictionaries';
-import { getCardListings } from '@/lib/data';
 import { CardItem } from './card-item';
 import { cn } from '@/lib/utils';
 import { Locale } from '@/i18n-config';
+import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { CardListing } from '@/lib/definitions';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+
+// This function fetches all card listings from the 'listings' collection in Firestore.
+async function getCardListings(): Promise<CardListing[]> {
+  try {
+    const listingsCol = collection(db, 'listings');
+    const listingSnapshot = await getDocs(listingsCol);
+    const cardListings = listingSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+      const data = doc.data();
+      
+      const imageId = data.imageId || `card${(Math.floor(Math.random() * 9) + 1)}`;
+      const image = PlaceHolderImages.find(img => img.id === imageId) || PlaceHolderImages[0];
+
+      return {
+        id: doc.id,
+        name: data.name || 'Unknown Card',
+        edition: data.edition || 'Unknown Set',
+        image,
+        seller: data.seller || { name: 'Anonymous', reputation: 0, avatarUrl: '' },
+        price: data.price || 0,
+        condition: data.condition || 'NM',
+        isFoil: data.isFoil || false,
+        color: data.color || [],
+        manaCost: data.manaCost || 0,
+        language: data.language || 'English',
+      } as CardListing;
+    });
+
+    return cardListings;
+  } catch (error) {
+    console.error("Error fetching card listings from Firestore:", error);
+    return []; // Return an empty array on error
+  }
+}
+
 
 export async function CardGrid({
   lang,
@@ -68,5 +105,3 @@ export async function CardGrid({
     </div>
   );
 }
-
-    
