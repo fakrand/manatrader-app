@@ -36,6 +36,10 @@ type ScryfallCard = {
     image_uris?: {
         large: string;
     };
+    prices: {
+        usd: string | null;
+        usd_foil: string | null;
+    }
 };
 
 export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'], lang: Locale }) {
@@ -49,6 +53,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     const [isFetchingEditions, setIsFetchingEditions] = useState(false);
     const [selectedEditionId, setSelectedEditionId] = useState<string>('');
     const [selectedCardImage, setSelectedCardImage] = useState<string>('/card-back.png');
+    const [marketPrice, setMarketPrice] = useState<string | null>(null);
 
     const suggestionsRef = useRef<HTMLUListElement>(null);
 
@@ -62,11 +67,16 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     useEffect(() => {
         if (selectedEditionId) {
             const edition = cardEditions.find(e => e.id === selectedEditionId);
-            if (edition && edition.image_uris) {
-                setSelectedCardImage(edition.image_uris.large);
+            if (edition) {
+                 if(edition.image_uris) {
+                    setSelectedCardImage(edition.image_uris.large);
+                 }
+                 const price = edition.prices?.usd || edition.prices?.usd_foil;
+                 setMarketPrice(price || null);
             }
         } else {
             setSelectedCardImage('/card-back.png');
+            setMarketPrice(null);
         }
     }, [selectedEditionId, cardEditions]);
     
@@ -108,6 +118,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         setSuggestions([]);
         setIsFetchingEditions(true);
         setSelectedEditionId('');
+        setMarketPrice(null);
         
         try {
             const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=%21"${encodeURIComponent(suggestion)}"`);
@@ -127,6 +138,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                     set_name: card.set_name,
                     digital: card.digital,
                     image_uris: card.image_uris,
+                    prices: card.prices,
                 }));
 
             setCardEditions(editions);
@@ -272,7 +284,11 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                             <Label htmlFor="price">{t.priceLabel}</Label>
                             <Input id="price" type="number" placeholder={t.pricePlaceholder} />
                             <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                <HelpCircle className="w-3 h-3"/> {t.marketPrice.replace('{price}', '6.78')}
+                                <HelpCircle className="w-3 h-3"/>
+                                {marketPrice 
+                                    ? t.marketPrice.replace('{price}', marketPrice) 
+                                    : (selectedCardName ? 'No market price available.' : 'Select a card to see market price.')
+                                }
                             </p>
                         </div>
                          <div className="space-y-2">
