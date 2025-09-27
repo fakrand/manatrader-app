@@ -289,8 +289,14 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                   <Label htmlFor="edition">{t.editionLabel}</Label>
                   <Select
                     disabled={!selectedCardName || isFetchingEditions || uniqueEditions.length === 0}
-                    value={selectedEditionId}
-                    onValueChange={setSelectedEditionId}>
+                    value={uniqueEditions.find(e => e.set === allCardPrints.find(p => p.id === selectedEditionId)?.set)?.id}
+                    onValueChange={id => {
+                        const newSet = uniqueEditions.find(p => p.id === id)?.set;
+                        const firstPrintOfSet = allCardPrints.find(p => p.set === newSet);
+                        if (firstPrintOfSet) {
+                            setSelectedEditionId(firstPrintOfSet.id);
+                        }
+                    }}>
                     <SelectTrigger id="edition">
                       <SelectValue placeholder={
                         isFetchingEditions ? "Cargando..." : (uniqueEditions.length === 0 && selectedCardName ? "No se encontraron ediciones" : t.selectEdition)
@@ -443,5 +449,3 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     </div>
   );
 }
-
-    
