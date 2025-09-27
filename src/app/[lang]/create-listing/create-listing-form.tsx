@@ -225,11 +225,15 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                             <SelectValue placeholder={t.selectCondition} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="NM">{t.conditions.NM}</SelectItem>
-                                            <SelectItem value="LP">{t.conditions.LP}</SelectItem>
-                                            <SelectItem value="MP">{t.conditions.MP}</SelectItem>
-                                            <SelectItem value="HP">{t.conditions.HP}</SelectItem>
-                                            <SelectItem value="DMG">{t.conditions.DMG}</SelectItem>
+                                            {(Object.keys(t.conditions) as Array<keyof typeof t.conditions>).map((key) => (
+                                                <SelectItem key={key} value={key}>
+                                                <div className="flex items-center w-full">
+                                                    <span className="font-bold w-12 text-left">{key}</span>
+                                                    <span className="mx-2">-</span>
+                                                    <span>{t.conditions[key].split(' - ')[1]}</span>
+                                                </div>
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
