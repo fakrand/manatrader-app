@@ -32,7 +32,6 @@ export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary['home']
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const [suggestedFilters, setSuggestedFilters] = useState<string[]>([]);
 
   const t = dict;
 
@@ -55,13 +54,7 @@ export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary['home']
     startTransition(() => {
       router.push(`${pathname}?${createQueryString({ query: e.target.value })}`, { scroll: false });
     });
-    debouncedSmartFilter(e.target.value);
   };
-  
-  const debouncedSmartFilter = useDebounceCallback(async (query: string) => {
-    const suggestions = await fetchSmartFilters(query);
-    setSuggestedFilters(suggestions);
-  }, 500);
 
   const handleSliderChange = (newPrice: number[]) => {
     startTransition(() => {
@@ -85,12 +78,6 @@ export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary['home']
 
   const selectedPrice = searchParams.get('price') ? [Number(searchParams.get('price'))] : [2000];
   
-  const getFilterClass = (filterName: string) => {
-    return cn("w-full", {
-      "ring-2 ring-primary rounded-md transition-all duration-300": suggestedFilters.includes(filterName),
-    });
-  };
-  
   const defaultAccordionValues = Array.from(searchParams.keys());
 
   return (
@@ -106,7 +93,7 @@ export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary['home']
       </div>
 
       <Accordion type="multiple" defaultValue={defaultAccordionValues} className="w-full">
-        <AccordionItem value="condition" className={getFilterClass('Condition')}>
+        <AccordionItem value="condition">
           <AccordionTrigger>{t.condition}</AccordionTrigger>
           <AccordionContent>
             {conditions.map((condition) => (
@@ -118,7 +105,7 @@ export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary['home']
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="language" className={getFilterClass('Language')}>
+        <AccordionItem value="language">
           <AccordionTrigger>{t.language}</AccordionTrigger>
           <AccordionContent>
             {languages.map((lang) => (
@@ -130,7 +117,7 @@ export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary['home']
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="price" className={getFilterClass('Price')}>
+        <AccordionItem value="price">
           <AccordionTrigger>{t.price}</AccordionTrigger>
           <AccordionContent>
             <div className="p-2 space-y-4">
@@ -148,7 +135,7 @@ export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary['home']
           </AccordionContent>
         </AccordionItem>
 
-         <AccordionItem value="color" className={getFilterClass('Color')}>
+         <AccordionItem value="color">
           <AccordionTrigger>{t.color}</AccordionTrigger>
           <AccordionContent>
             <div className="flex justify-around p-2">
@@ -170,7 +157,7 @@ export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary['home']
           </AccordionContent>
         </AccordionItem>
 
-         <AccordionItem value="cost" className={getFilterClass('Cost of Mana')}>
+         <AccordionItem value="cost">
           <AccordionTrigger>{t.manaCost}</AccordionTrigger>
           <AccordionContent>
              <div className="p-2 space-y-4">
