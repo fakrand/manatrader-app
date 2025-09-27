@@ -171,7 +171,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                 setSelectedFinish(allFinishes.includes('nonfoil') ? 'nonfoil' : allFinishes[0]);
             }
             
-            allPrints.sort((a, b) => new Date(a.released_at).getTime() - new Date(b.released_at).getTime());
+            allPrints.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
 
 
             // Reduce to unique sets, keeping the first one found
@@ -247,33 +247,33 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                     </ul>
                                 )}
                             </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="edition">{t.editionLabel}</Label>
-                                <Select
-                                    disabled={!selectedCardName || isFetchingEditions || cardEditions.length === 0}
-                                    value={selectedEditionId}
-                                    onValueChange={setSelectedEditionId}
-                                >
-                                    <SelectTrigger id="edition" className='w-full'>
-                                        <SelectValue placeholder={
-                                            isFetchingEditions ? "Cargando..." : (cardEditions.length === 0 && selectedCardName ? "No se encontraron ediciones" : t.selectEdition)
-                                        }>
-                                            {isFetchingEditions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                            {selectedEditionId ? cardEditions.find(e => e.id === selectedEditionId)?.set_name : (isFetchingEditions ? "Cargando..." : t.selectEdition)}
-                                        </SelectValue>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {cardEditions.map((edition) => (
-                                            <SelectItem key={edition.id} value={edition.id}>
-                                                {edition.set_name} ({edition.set.toUpperCase()})
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="condition">{t.conditionLabel}</Label>
+                                    <Label htmlFor="edition">{t.editionLabel}</Label>
+                                    <Select
+                                        disabled={!selectedCardName || isFetchingEditions || cardEditions.length === 0}
+                                        value={selectedEditionId}
+                                        onValueChange={setSelectedEditionId}
+                                    >
+                                        <SelectTrigger id="edition" className='w-full'>
+                                            <SelectValue placeholder={
+                                                isFetchingEditions ? "Cargando..." : (cardEditions.length === 0 && selectedCardName ? "No se encontraron ediciones" : t.selectEdition)
+                                            }>
+                                                {isFetchingEditions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                {selectedEditionId ? cardEditions.find(e => e.id === selectedEditionId)?.set_name : (isFetchingEditions ? "Cargando..." : t.selectEdition)}
+                                            </SelectValue>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {cardEditions.map((edition) => (
+                                                <SelectItem key={edition.id} value={edition.id}>
+                                                    {edition.set_name} ({edition.set.toUpperCase()})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                <Label htmlFor="condition">{t.conditionLabel}</Label>
                                     <Select>
                                         <SelectTrigger id="condition">
                                             <SelectValue placeholder={t.selectCondition} />
@@ -291,6 +291,8 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                         </SelectContent>
                                     </Select>
                                 </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="quantity">{t.quantityLabel}</Label>
                                     <Input id="quantity" type="number" defaultValue="1" min="1" />
