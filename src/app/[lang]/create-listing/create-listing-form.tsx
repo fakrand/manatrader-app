@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { HelpCircle, Image as ImageIcon } from "lucide-react";
+import { HelpCircle, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Locale } from "@/i18n-config";
 import { cn } from '@/lib/utils';
 import { Dictionary } from '@/lib/definitions';
@@ -28,6 +28,14 @@ const MOCK_CARD_NAMES = [
     "Wrath of God"
 ];
 
+type ScryfallCard = {
+    id: string;
+    name: string;
+    set: string;
+    set_name: string;
+    digital: boolean;
+};
+
 export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'], lang: Locale }) {
     const listingLimitReached = false;
 
@@ -35,6 +43,10 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [activeSuggestion, setActiveSuggestion] = useState(-1);
     const [selectedCard, setSelectedCard] = useState<string | null>(null);
+    const [cardEditions, setCardEditions] = useState<ScryfallCard[]>([]);
+    const [isFetchingEditions, setIsFetchingEditions] = useState(false);
+    const [selectedEdition, setSelectedEdition] = useState<string>('');
+
     const suggestionsRef = useRef<HTMLUListElement>(null);
 
     const filteredSuggestions = useMemo(() => {
@@ -48,6 +60,8 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         const value = e.target.value;
         setSearchQuery(value);
         setSelectedCard(null);
+        setCardEditions([]); // Reset editions when search changes
+        setSelectedEdition('');
         if (value) {
             setSuggestions(filteredSuggestions);
         } else {
@@ -73,10 +87,42 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         }
     };
 
-    const handleSuggestionClick = (suggestion: string) => {
+    const handleSuggestionClick = async (suggestion: string) => {
         setSearchQuery(suggestion);
         setSelectedCard(suggestion);
         setSuggestions([]);
+        setIsFetchingEditions(true);
+        setSelectedEdition('');
+        
+        try {
+            // Use encodeURIComponent to safely handle card names with special characters
+            const encodedCardName = encodeURIComponent(suggestion);
+            const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=!${encodedCardName}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch card editions');
+            }
+            
+            const data = await response.json();
+            
+            const editions: ScryfallCard[] = data.data
+                .filter((card: ScryfallCard) => !card.digital) // Exclude digital-only sets
+                .map((card: ScryfallCard) => ({
+                    id: card.id,
+                    name: card.name,
+                    set: card.set,
+                    set_name: card.set_name,
+                    digital: card.digital
+                }));
+
+            setCardEditions(editions);
+
+        } catch (error) {
+            console.error(error);
+            setCardEditions([]); // Clear editions on error
+        } finally {
+            setIsFetchingEditions(false);
+        }
     };
     
     useEffect(() => {
@@ -133,16 +179,25 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="edition">{t.editionLabel}</Label>
-                            <Select disabled={!selectedCard}>
+                            <Select
+                                disabled={!selectedCard || isFetchingEditions}
+                                value={selectedEdition}
+                                onValueChange={setSelectedEdition}
+                            >
                                 <SelectTrigger id="edition">
-                                    <SelectValue placeholder={t.selectEdition} />
+                                    <SelectValue placeholder={
+                                        isFetchingEditions ? "Cargando..." : t.selectEdition
+                                    }>
+                                        {isFetchingEditions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {selectedEdition ? cardEditions.find(e => e.id === selectedEdition)?.set_name : (isFetchingEditions ? "Cargando..." : t.selectEdition)}
+                                    </SelectValue>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {/* In a real scenario, this would be populated based on the selected card */}
-                                    <SelectItem value="LEA">Limited Edition Alpha</SelectItem>
-                                    <SelectItem value="LEB">Limited Edition Beta</SelectItem>
-                                    <SelectItem value="2ED">Unlimited Edition</SelectItem>
-                                    <SelectItem value="CMR">Commander Legends</SelectItem>
+                                    {cardEditions.map((edition) => (
+                                         <SelectItem key={edition.id} value={edition.id}>
+                                            {edition.set_name} ({edition.set.toUpperCase()})
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
