@@ -277,7 +277,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                 <div className="space-y-2">
+                                <div className="space-y-2">
                                 <Label htmlFor="condition">{t.conditionLabel}</Label>
                                     <Select>
                                         <SelectTrigger id="condition">
@@ -412,5 +412,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
     
     
 
+
+    
 
     
