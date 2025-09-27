@@ -34,7 +34,18 @@ type ScryfallCard = {
         usd_etched: string | null;
     };
     finishes: string[];
+    border_color: string;
+    frame_effects?: string[];
 };
+
+function getVariantInfo(card: ScryfallCard) {
+    const parts = [];
+    if (card.frame_effects?.includes('showcase')) parts.push('Showcase');
+    if (card.border_color === 'borderless') parts.push('Borderless');
+    if (card.frame_effects?.includes('extendedart')) parts.push('Extended Art');
+    return parts.length > 0 ? `(${parts.join(', ')})` : '';
+}
+
 
 export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'], lang: Locale }) {
     const listingLimitReached = false;
@@ -173,16 +184,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
             
             allPrints.sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
 
-
-            // Reduce to unique sets, keeping the first one found
-            const uniqueEditions = allPrints.reduce((acc: ScryfallCard[], current) => {
-                if (!acc.some(item => item.set === current.set)) {
-                    acc.push(current);
-                }
-                return acc;
-            }, []);
-
-            setCardEditions(uniqueEditions);
+            setCardEditions(allPrints);
 
         } catch (error) {
             console.error(error);
@@ -264,15 +266,18 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                             </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {cardEditions.map((edition) => (
+                                            {cardEditions.map((edition) => {
+                                                const variantInfo = getVariantInfo(edition);
+                                                return (
                                                 <SelectItem key={edition.id} value={edition.id}>
-                                                    {edition.set_name} ({edition.set.toUpperCase()})
+                                                    {edition.set_name} {variantInfo}
                                                 </SelectItem>
-                                            ))}
+                                                )
+                                            })}
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-2">
+                                 <div className="space-y-2">
                                 <Label htmlFor="condition">{t.conditionLabel}</Label>
                                     <Select>
                                         <SelectTrigger id="condition">
@@ -281,7 +286,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                         <SelectContent>
                                             {(Object.keys(t.conditions) as Array<keyof typeof t.conditions>).map((key) => (
                                                 <SelectItem key={key} value={key}>
-                                                <div className="flex items-center w-full">
+                                                <div className="flex items-center">
                                                     <span className="font-bold w-10 text-left">{key}</span>
                                                     <span className="mx-2">-</span>
                                                     <span>{t.conditions[key].split(' - ')[1]}</span>
@@ -292,7 +297,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                     </Select>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-6">
+                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="quantity">{t.quantityLabel}</Label>
                                     <Input id="quantity" type="number" defaultValue="1" min="1" />
@@ -404,6 +409,8 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         </div>
     );
 }
-
     
+    
+
+
     
