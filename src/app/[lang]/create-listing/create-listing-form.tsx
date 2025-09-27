@@ -97,7 +97,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
         try {
             // Use encodeURIComponent to safely handle card names with special characters
             const encodedCardName = encodeURIComponent(suggestion);
-            const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=!${encodedCardName}`);
+            const response = await fetch(`https://api.scryfall.com/cards/search?unique=prints&q=${encodedCardName}`);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch card editions');
@@ -188,7 +188,7 @@ export function CreateListingForm({ t, lang }: { t: Dictionary['createListing'],
                                     <SelectValue placeholder={
                                         isFetchingEditions ? "Cargando..." : t.selectEdition
                                     }>
-                                        {isFetchingEditions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {isFetchingEditions ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                                         {selectedEdition ? cardEditions.find(e => e.id === selectedEdition)?.set_name : (isFetchingEditions ? "Cargando..." : t.selectEdition)}
                                     </SelectValue>
                                 </SelectTrigger>
