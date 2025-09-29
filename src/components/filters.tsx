@@ -18,14 +18,13 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from './ui/button';
 import { ManaSymbol } from './mana-symbol';
 import { cn } from '@/lib/utils';
-import { Locale } from '@/i18n-config';
 import { Dictionary } from '@/lib/definitions';
 
 const conditions = ['NM', 'LP', 'MP', 'HP', 'DMG'];
 const languages = ['English', 'Spanish', 'Japanese'];
 const colors: ('W' | 'U' | 'B' | 'R' | 'G')[] = ['W', 'U', 'B', 'R', 'G'];
 
-export function Filters({ lang, dict }: { lang: Locale, dict: Dictionary['home']['filters'] }) {
+export function Filters({ dict }: { dict: Dictionary['home']['filters'] }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

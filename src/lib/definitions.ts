@@ -1,4 +1,5 @@
 
+
 import type { ImagePlaceholder } from './placeholder-images';
 
 // We define the structure of the dictionary statically.
@@ -80,18 +81,14 @@ export type Dictionary = {
   createListing: {
     title: string;
     description: string;
-    step1Title: string;
-    step1Description: string;
     step1SearchLabel: string;
     step1SearchPlaceholder: string;
     editionLabel: string;
     selectEdition: string;
-    step2Title: string;
-    step2Description: string;
-    step2DescriptionSelected: string;
     priceLabel: string;
     pricePlaceholder: string;
     marketPrice: string;
+    noImageSelected: string;
     quantityLabel: string;
     conditionLabel: string;
     selectCondition: string;
@@ -112,7 +109,7 @@ export type Dictionary = {
       de: string;
       it: string;
       pt: string;
-      jp: string;
+      ja: string;
       ko: string;
       ru: string;
       zhs: string;
@@ -127,9 +124,10 @@ export type Dictionary = {
     foilLabel: string;
     selectFoil: string;
     foils: {
-      none: string;
+      nonfoil: string;
       foil: string;
       etched: string;
+      glossy: string;
       galaxy: string;
     };
     imagesLabel: string;
@@ -169,6 +167,7 @@ export type Dictionary = {
     verifyCode: string;
     error: string;
     errors: {
+      [key: string]: string;
       'auth/invalid-credential': string;
       'auth/email-already-in-use': string;
       'auth/weak-password': string;

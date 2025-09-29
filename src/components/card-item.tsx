@@ -11,15 +11,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Locale } from '@/i18n-config';
 
 interface CardItemProps {
   listing: CardListing;
-  lang: Locale;
   t: Dictionary['home']['cardItem'];
 }
 
-export function CardItem({ listing, lang, t }: CardItemProps) {
+export function CardItem({ listing, t }: CardItemProps) {
   return (
     <div className="group relative">
       <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-card shadow-lg group-hover:shadow-primary/50 transition-shadow">

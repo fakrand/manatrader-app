@@ -9,7 +9,6 @@ import {
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter, usePathname } from 'next/navigation';
-import { Locale, i18n } from '@/i18n-config';
 
 interface AuthContextType {
   user: User | null;
@@ -36,12 +35,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(user);
       setLoading(false);
 
-      const lang = (pathname.split('/')[1] || i18n.defaultLocale) as Locale;
-      // This is safe because `pathname` will always have at least one segment
-      const currentRoute = '/' + (pathname.split('/').slice(2).join('/') || '');
-
-      if (!user && protectedRoutes.some(route => currentRoute.startsWith(route))) {
-        router.push(`/${lang}/auth`);
+      if (!user && protectedRoutes.some(route => pathname.startsWith(route))) {
+        router.push(`/auth`);
       }
     });
 
@@ -50,8 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    const lang = (pathname.split('/')[1] || i18n.defaultLocale) as Locale;
-    router.push(`/${lang}`);
+    router.push(`/`);
   };
 
   return (
@@ -68,14 +62,12 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
-  const lang = (pathname.split('/')[1] || i18n.defaultLocale) as Locale;
-
+  
   useEffect(() => {
     if (!loading && user) {
-      router.replace(`/${lang}/profile`);
+      router.replace(`/profile`);
     }
-  }, [user, loading, router, lang]);
+  }, [user, loading, router]);
 
   if (loading || user) {
     return (

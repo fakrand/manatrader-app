@@ -1,9 +1,9 @@
+
 import { getDictionary } from '@/lib/dictionaries';
 import { Logo } from './logo';
-import { Locale } from '@/i18n-config';
 
-export default async function Footer({ lang }: { lang: Locale }) {
-  const dict = await getDictionary(lang);
+export default async function Footer() {
+  const dict = await getDictionary();
   const t = dict.footer;
   return (
     <footer className="py-6 md:px-8 md:py-0">

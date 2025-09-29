@@ -2,7 +2,6 @@
 import { getDictionary } from '@/lib/dictionaries';
 import { CardItem } from './card-item';
 import { cn } from '@/lib/utils';
-import { Locale } from '@/i18n-config';
 import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { CardListing } from '@/lib/definitions';
@@ -43,13 +42,11 @@ async function getCardListings(): Promise<CardListing[]> {
 
 
 export async function CardGrid({
-  lang,
   searchParams,
 }: {
-  lang: Locale;
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const dict = await getDictionary(lang);
+  const dict = await getDictionary();
   const t = dict.home.cardGrid;
   const cardItemT = dict.home.cardItem;
   
@@ -100,7 +97,7 @@ export async function CardGrid({
       "xl:grid-cols-3"
     )}>
       {filteredListings.map((listing) => (
-        <CardItem key={listing.id} listing={listing} lang={lang} t={cardItemT} />
+        <CardItem key={listing.id} listing={listing} t={cardItemT} />
       ))}
     </div>
   );
