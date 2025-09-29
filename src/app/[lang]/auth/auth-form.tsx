@@ -65,13 +65,19 @@ export function AuthForm({ t, lang }: AuthFormProps) {
     const [tab, setTab] = useState<'email' | 'phone'>('email');
     const [phoneStep, setPhoneStep] = useState<'phone' | 'code'>('phone');
     
-    // --- State and Actions ---
-    const [signInState, signInAction] = useActionState(signInWithEmail, undefined);
-    const [signUpState, signUpAction] = useActionState(signUpWithEmail, undefined);
-    const [googleState, googleAction] = useActionState(signInWithGoogle, undefined);
-    const [phoneState, phoneAction] = useActionState(sendVerificationCode, undefined);
-    const [codeState, codeAction] = useActionState(verifyPhoneNumber, undefined);
-    
+    // --- Centralized Action State ---
+    const [formState, formAction] = useActionState<AuthState | undefined, FormData>(
+        async (previousState, formData) => {
+            const action = formData.get('action') as string;
+            if (action === 'google') return signInWithGoogle(previousState, formData);
+            if (action === 'sendCode') return sendVerificationCode(previousState, formData);
+            if (action === 'verifyCode') return verifyPhoneNumber(previousState, formData);
+            // Default to email actions if not specified
+            return signInWithEmail(previousState, formData);
+        },
+        undefined
+    );
+
     // --- Refs ---
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
     const suggestionsRef = useRef<HTMLUListElement>(null);
@@ -95,32 +101,24 @@ export function AuthForm({ t, lang }: AuthFormProps) {
     
     // --- Centralized Auth Result Handling ---
     useEffect(() => {
-        const handleAuthResult = (state: AuthState | undefined) => {
-            if (!state) return;
+        if (!formState) return;
 
-            if (state.error) {
-                const errorMessageKey = state.error as keyof Dictionary['auth']['errors'];
-                toast({
-                    variant: 'destructive',
-                    title: t.error,
-                    description: t.errors[errorMessageKey] || t.errors['auth/default'],
-                });
-            } else if (state.success) {
-                router.push(`/${lang}/profile`);
-            } else if (state.isGoogleRedirect) {
-                // Redirect is handled by Firebase, nothing to do here
-            } else if (state.isPhoneStep) {
-                handleSendVerificationCode();
-            }
-        };
+        if (formState.error) {
+            const errorMessageKey = formState.error as keyof Dictionary['auth']['errors'];
+            toast({
+                variant: 'destructive',
+                title: t.error,
+                description: t.errors[errorMessageKey] || t.errors['auth/default'],
+            });
+        } else if (formState.success) {
+            router.push(`/${lang}/profile`);
+        } else if (formState.isGoogleRedirect) {
+            // Redirect is handled by Firebase, nothing to do here
+        } else if (formState.isPhoneStep) {
+            handleSendVerificationCode();
+        }
 
-        handleAuthResult(signInState);
-        handleAuthResult(signUpState);
-        handleAuthResult(googleState);
-        handleAuthResult(phoneState);
-        handleAuthResult(codeState);
-
-    }, [signInState, signUpState, googleState, phoneState, codeState, lang, router, t, toast]);
+    }, [formState, lang, router, t, toast]);
 
 
     const handleSendVerificationCode = async () => {
@@ -229,7 +227,7 @@ export function AuthForm({ t, lang }: AuthFormProps) {
                     
                     <TabsContent value="email">
                         <Form {...emailForm}>
-                            <form className="space-y-4 pt-4">
+                            <form action={formAction} className="space-y-4 pt-4">
                                 <FormField
                                 control={emailForm.control}
                                 name="email"
@@ -281,8 +279,8 @@ export function AuthForm({ t, lang }: AuthFormProps) {
                                 )}
                                 />
                                 <div className="flex gap-2">
-                                     <Button type="submit" formAction={signInAction} className="w-full">{t.login}</Button>
-                                     <Button type="submit" formAction={signUpAction} variant="secondary" className="w-full">{t.signup}</Button>
+                                     <SubmitButton text={t.login} formAction={signInWithEmail} />
+                                     <Button type="submit" formAction={signUpWithEmail} variant="secondary" className="w-full">{t.signup}</Button>
                                 </div>
                             </form>
                         </Form>
@@ -296,7 +294,8 @@ export function AuthForm({ t, lang }: AuthFormProps) {
                                 </span>
                             </div>
                         </div>
-                        <form action={googleAction}>
+                        <form action={formAction}>
+                           <input type="hidden" name="action" value="google" />
                            <GoogleButton text={t.google}/>
                         </form>
                     </TabsContent>
@@ -304,7 +303,8 @@ export function AuthForm({ t, lang }: AuthFormProps) {
                     <TabsContent value="phone">
                         {phoneStep === 'phone' ? (
                             <Form {...phoneForm}>
-                                <form action={phoneAction} className="space-y-4 pt-4">
+                                <form action={formAction} className="space-y-4 pt-4">
+                                     <input type="hidden" name="action" value="sendCode" />
                                     <FormField
                                     control={phoneForm.control}
                                     name="phone"
@@ -351,5 +351,3 @@ export function AuthForm({ t, lang }: AuthFormProps) {
         </Card>
     );
 }
-
-    

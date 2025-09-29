@@ -6,9 +6,6 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithRedirect,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  ConfirmationResult
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { z } from 'zod';
@@ -36,8 +33,8 @@ export type AuthState = {
 
 declare global {
   interface Window {
-    recaptchaVerifier?: RecaptchaVerifier;
-    confirmationResult?: ConfirmationResult;
+    recaptchaVerifier?: import('firebase/auth').RecaptchaVerifier;
+    confirmationResult?: import('firebase/auth').ConfirmationResult;
   }
 }
 
@@ -63,7 +60,7 @@ export async function signInWithEmail(prevState: AuthState, formData: FormData):
     }
 }
 
-export async function signInWithGoogle(): Promise<AuthState> {
+export async function signInWithGoogle(prevState: AuthState, formData: FormData): Promise<AuthState> {
   try {
     const provider = new GoogleAuthProvider();
     await signInWithRedirect(auth, provider);
@@ -99,3 +96,4 @@ export async function verifyPhoneNumber(prevState: any, formData: FormData): Pro
         return { error: error.code || 'auth/default' };
     }
 }
+
