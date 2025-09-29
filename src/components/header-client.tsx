@@ -23,7 +23,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Logo } from './logo';
-import { LanguageSwitcher } from './language-switcher';
 import { Locale } from '@/i18n-config';
 import { useAuth } from '@/hooks/use-auth';
 import { Dictionary } from '@/lib/definitions';
@@ -65,7 +64,6 @@ export function HeaderClient({ lang, dict }: { lang: Locale, dict: Dictionary })
             {/* Mobile Nav could go here */}
           </div>
           <nav className="flex items-center">
-            <LanguageSwitcher lang={lang} />
             <Button variant="ghost" size="icon" asChild>
               <Link href={`/${lang}/cart`}>
                 <ShoppingCart className="h-5 w-5" />

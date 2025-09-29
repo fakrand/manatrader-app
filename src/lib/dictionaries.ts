@@ -4,7 +4,6 @@ import type { Dictionary } from './definitions';
 
 // Map de loaders, tipado estrictamente con los locales soportados
 const dictionaries: Record<Locale, () => Promise<Dictionary>> = {
-  en: () => import('@/dictionaries/en.json').then((module) => module.default),
   es: () => import('@/dictionaries/es.json').then((module) => module.default),
 };
 
