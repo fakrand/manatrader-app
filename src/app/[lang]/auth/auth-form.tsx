@@ -48,14 +48,14 @@ const codeSchema = z.object({
 
 const emailDomains = ['gmail.com', 'outlook.com', 'yahoo.com'];
 
-function SubmitButton({ text }: { text: string }) {
+function SubmitButton({ text, formAction }: { text: string, formAction?: (payload: FormData) => void }) {
     const { pending } = useFormStatus();
-    return <Button type="submit" disabled={pending} className="w-full">{text}</Button>
+    return <Button type="submit" disabled={pending} formAction={formAction} className="w-full">{text}</Button>
 }
 
-function GoogleButton({ text }: { text: string }) {
+function GoogleButton({ text, formAction }: { text: string, formAction?: (payload: FormData) => void }) {
     const { pending } = useFormStatus();
-    return <Button type="submit" variant="outline" className="w-full" disabled={pending}>{text}</Button>
+    return <Button type="submit" variant="outline" className="w-full" disabled={pending} formAction={formAction}>{text}</Button>
 }
 
 
@@ -281,16 +281,8 @@ export function AuthForm({ t, lang }: AuthFormProps) {
                                 )}
                                 />
                                 <div className="flex gap-2">
-                                    <form action={signInAction} className="w-full">
-                                        <input type="hidden" name="email" value={emailForm.watch('email')} />
-                                        <input type="hidden" name="password" value={emailForm.watch('password')} />
-                                        <SubmitButton text={t.login} />
-                                    </form>
-                                    <form action={signUpAction} className="w-full">
-                                        <input type="hidden" name="email" value={emailForm.watch('email')} />
-                                        <input type="hidden" name="password" value={emailForm.watch('password')} />
-                                        <Button type="submit" variant="secondary" className="w-full">{t.signup}</Button>
-                                    </form>
+                                     <Button type="submit" formAction={signInAction} className="w-full">{t.login}</Button>
+                                     <Button type="submit" formAction={signUpAction} variant="secondary" className="w-full">{t.signup}</Button>
                                 </div>
                             </form>
                         </Form>
