@@ -21,7 +21,7 @@ import {
     sendVerificationCode,
     verifyPhoneNumber,
     AuthState,
-} from '@/app/auth/actions';
+} from './actions';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
@@ -70,7 +70,8 @@ export function AuthForm({ t }: AuthFormProps) {
             if (action === 'sendCode') return sendVerificationCode(previousState, formData);
             if (action === 'verifyCode') return verifyPhoneNumber(previousState, formData);
             if (action === 'signup') return signUpWithEmail(previousState, formData);
-            // Default to email actions if not specified
+            if (action === 'signin') return signInWithEmail(previousState, formData);
+            // Default to sign in if no action is specified (though it always should be)
             return signInWithEmail(previousState, formData);
         },
         undefined
