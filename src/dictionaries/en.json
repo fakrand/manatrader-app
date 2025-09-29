@@ -88,6 +88,7 @@
     "priceLabel": "Price",
     "pricePlaceholder": "e.g., S/. 25.50",
     "marketPrice": "TCGplayer Market Price: $ {price} (USD)",
+    "noImageSelected": "No image selected",
     "quantityLabel": "Quantity (Stock)",
     "conditionLabel": "Condition",
     "selectCondition": "Select card condition",
@@ -118,11 +119,11 @@
       "ar": "Arabic",
       "sa": "Sanskrit",
       "px": "Phyrexian",
-      "cs": "Checo",
-      "pl": "Polaco",
-      "nl": "Holandés"
+      "cs": "Czech",
+      "pl": "Polish",
+      "nl": "Dutch"
     },
-    "foilLabel": "Foil Type",
+    "foilLabel": "Print Variant",
     "selectFoil": "Select foil type",
     "foils": {
       "nonfoil": "Non-Foil",
@@ -180,5 +181,3 @@
     "description": "Buy, sell, and trade Magic: The Gathering cards in Peru. The largest community of players and stores."
   }
 }
-
-    

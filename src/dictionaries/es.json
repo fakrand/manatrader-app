@@ -88,6 +88,7 @@
     "priceLabel": "Precio",
     "pricePlaceholder": "ej., S/. 25.50",
     "marketPrice": "Precio de mercado TCGplayer: $ {price} (USD)",
+    "noImageSelected": "No hay imagen seleccionada",
     "quantityLabel": "Cantidad (Stock)",
     "conditionLabel": "Condición",
     "selectCondition": "Selecciona la condición",
@@ -122,7 +123,7 @@
       "pl": "Polaco",
       "nl": "Holandés"
     },
-    "foilLabel": "Tipo de Foil",
+    "foilLabel": "Variante de Impresión",
     "selectFoil": "Selecciona el tipo de foil",
     "foils": {
       "nonfoil": "Normal",
@@ -180,5 +181,3 @@
     "description": "Compra, vende e intercambia cartas de Magic: The Gathering en Perú. La comunidad más grande de jugadores y tiendas."
   }
 }
-
-    
