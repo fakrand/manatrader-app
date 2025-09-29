@@ -1,11 +1,10 @@
 import { getDictionary } from '@/lib/dictionaries';
 import { HeaderClient } from './header-client';
-import { Locale } from '@/i18n-config';
 
-export default async function Header({ lang }: { lang: Locale }) {
-  const dict = await getDictionary(lang);
+export default async function Header() {
+  const dict = await getDictionary();
   
   return (
-    <HeaderClient dict={dict} lang={lang} />
+    <HeaderClient dict={dict} />
   );
 }

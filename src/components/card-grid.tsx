@@ -5,7 +5,6 @@ import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from 'fireba
 import { db } from '@/lib/firebase';
 import type { CardListing, Dictionary } from '@/lib/definitions';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Locale } from '@/i18n-config';
 
 
 // This function fetches all card listings from the 'listings' collection in Firestore.
@@ -43,13 +42,11 @@ async function getCardListings(): Promise<CardListing[]> {
 
 
 export async function CardGrid({
-  lang,
   searchParams,
 }: {
-  lang: Locale;
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const dict = await getDictionary(lang);
+  const dict = await getDictionary();
   const t = dict.home.cardGrid;
   const cardItemT = dict.home.cardItem;
   
@@ -100,7 +97,7 @@ export async function CardGrid({
       "xl:grid-cols-3"
     )}>
       {filteredListings.map((listing) => (
-        <CardItem key={listing.id} listing={listing} t={cardItemT} lang={lang} />
+        <CardItem key={listing.id} listing={listing} t={cardItemT} />
       ))}
     </div>
   );

@@ -1,4 +1,3 @@
-
 import { Suspense } from 'react';
 import { getDictionary } from '@/lib/dictionaries';
 import { CreateListingForm } from './create-listing-form';

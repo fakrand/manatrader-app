@@ -21,7 +21,7 @@ import {
     sendVerificationCode,
     verifyPhoneNumber,
     AuthState,
-} from './actions';
+} from '@/app/auth/actions';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
@@ -45,14 +45,14 @@ const codeSchema = z.object({
 
 const emailDomains = ['gmail.com', 'outlook.com', 'yahoo.com'];
 
-function SubmitButton({ text, formAction }: { text: string, formAction?: (payload: FormData) => void }) {
+function SubmitButton({ text }: { text: string }) {
     const { pending } = useFormStatus();
-    return <Button type="submit" disabled={pending} formAction={formAction} className="w-full">{text}</Button>
+    return <Button type="submit" disabled={pending} className="w-full">{text}</Button>
 }
 
-function GoogleButton({ text, formAction }: { text: string, formAction?: (payload: FormData) => void }) {
+function GoogleButton({ text }: { text: string }) {
     const { pending } = useFormStatus();
-    return <Button type="submit" variant="outline" className="w-full" disabled={pending} formAction={formAction}>{text}</Button>
+    return <Button type="submit" variant="outline" className="w-full" disabled={pending}>{text}</Button>
 }
 
 

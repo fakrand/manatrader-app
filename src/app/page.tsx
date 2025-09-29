@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { getDictionary } from '@/lib/dictionaries';
 import { ArrowRight, ShoppingCart, Repeat, PlusCircle } from 'lucide-react';
