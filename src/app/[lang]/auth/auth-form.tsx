@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useActionState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -66,11 +66,11 @@ export function AuthForm({ t, lang }: AuthFormProps) {
     const [phoneStep, setPhoneStep] = useState<'phone' | 'code'>('phone');
     
     // --- State and Actions ---
-    const [signInState, signInAction] = useFormState(signInWithEmail, undefined);
-    const [signUpState, signUpAction] = useFormState(signUpWithEmail, undefined);
-    const [googleState, googleAction] = useFormState(signInWithGoogle, undefined);
-    const [phoneState, phoneAction] = useFormState(sendVerificationCode, undefined);
-    const [codeState, codeAction] = useFormState(verifyPhoneNumber, undefined);
+    const [signInState, signInAction] = useActionState(signInWithEmail, undefined);
+    const [signUpState, signUpAction] = useActionState(signUpWithEmail, undefined);
+    const [googleState, googleAction] = useActionState(signInWithGoogle, undefined);
+    const [phoneState, phoneAction] = useActionState(sendVerificationCode, undefined);
+    const [codeState, codeAction] = useActionState(verifyPhoneNumber, undefined);
     
     // --- Refs ---
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
@@ -359,3 +359,5 @@ export function AuthForm({ t, lang }: AuthFormProps) {
         </Card>
     );
 }
+
+    
