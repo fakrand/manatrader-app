@@ -6,7 +6,6 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithRedirect,
-  getRedirectResult,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult
@@ -28,6 +27,13 @@ const codeSchema = z.object({
     verificationCode: z.string().length(6),
 });
 
+export type AuthState = {
+  success?: boolean;
+  error?: string;
+  isGoogleRedirect?: boolean;
+  isPhoneStep?: boolean;
+};
+
 declare global {
   interface Window {
     recaptchaVerifier?: RecaptchaVerifier;
@@ -35,10 +41,10 @@ declare global {
   }
 }
 
-
-export async function signUpWithEmail(prevState: any, formData: z.infer<typeof emailSchema>) {
+export async function signUpWithEmail(prevState: AuthState, formData: FormData): Promise<AuthState> {
+    const rawFormData = Object.fromEntries(formData);
     try {
-        const { email, password } = emailSchema.parse(formData);
+        const { email, password } = emailSchema.parse(rawFormData);
         await createUserWithEmailAndPassword(auth, email, password);
         return { success: true };
     } catch (error: any) {
@@ -46,9 +52,10 @@ export async function signUpWithEmail(prevState: any, formData: z.infer<typeof e
     }
 }
 
-export async function signInWithEmail(prevState: any, formData: z.infer<typeof emailSchema>) {
+export async function signInWithEmail(prevState: AuthState, formData: FormData): Promise<AuthState> {
+    const rawFormData = Object.fromEntries(formData);
     try {
-        const { email, password } = emailSchema.parse(formData);
+        const { email, password } = emailSchema.parse(rawFormData);
         await signInWithEmailAndPassword(auth, email, password);
         return { success: true };
     } catch (error: any) {
@@ -56,50 +63,37 @@ export async function signInWithEmail(prevState: any, formData: z.infer<typeof e
     }
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(): Promise<AuthState> {
   try {
     const provider = new GoogleAuthProvider();
-    const referer = headers().get('referer');
-    if(referer){
-       const url = new URL(referer);
-       await signInWithRedirect(auth, provider);
-       // The redirect will happen on the client, so we won't reach here on the server.
-       // This is just to initiate the process.
-    }
-     return { success: true };
+    await signInWithRedirect(auth, provider);
+    // This will trigger a redirect and the flow will continue on the client after redirect.
+    return { isGoogleRedirect: true };
   } catch (error: any) {
     return { error: error.code || 'auth/default' };
   }
 }
 
-export async function sendVerificationCode(prevState: any, formData: z.infer<typeof phoneSchema>){
+export async function sendVerificationCode(prevState: any, formData: FormData): Promise<AuthState>{
+    const rawFormData = Object.fromEntries(formData);
     try {
-        const { phone } = phoneSchema.parse(formData);
-        
-        // This is tricky because RecaptchaVerifier needs a DOM element.
-        // The pattern is to set it up on the client, then call this action.
-        // We'll assume the verifier is ready. This action is more of a placeholder
-        // for the server-side signInWithPhoneNumber call.
-        
-        // Due to the nature of Recaptcha, the actual call to signInWithPhoneNumber
-        // that returns a confirmationResult needs to happen on the client.
-        // This server action can't fully complete the flow by itself.
-        // The client will need to handle the confirmationResult.
-
-        return { success: true };
-  } catch (error: any) {
+        const { phone } = phoneSchema.parse(rawFormData);
+        // Due to RecaptchaVerifier requiring a DOM element, the actual signInWithPhoneNumber
+        // needs to be triggered from the client. This server action's role is to validate
+        // the form and signal the client to proceed with the phone auth.
+        return { isPhoneStep: true, success: true };
+  } catch (error: any)    {
     return { error: error.code || 'auth/default' };
   }
 }
 
-export async function verifyPhoneNumber(prevState: any, formData: z.infer<typeof codeSchema>){
+export async function verifyPhoneNumber(prevState: any, formData: FormData): Promise<AuthState>{
+     const rawFormData = Object.fromEntries(formData);
     try {
-        const { verificationCode } = codeSchema.parse(formData);
+        const { verificationCode } = codeSchema.parse(rawFormData);
         // The `confirmationResult` is not available on the server.
         // This verification must happen on the client side where `window.confirmationResult` is stored.
-        // This server action is a placeholder and shows the limitation.
-        
-        return { success: true };
+        return { isPhoneStep: false, success: true };
 
     } catch (error: any) {
         return { error: error.code || 'auth/default' };
