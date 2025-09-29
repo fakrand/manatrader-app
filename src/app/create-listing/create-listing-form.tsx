@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Dictionary } from "@/lib/definitions";
 import { CardSearch } from "./card-search";
@@ -42,18 +42,15 @@ export function CreateListingForm({ t }: CreateListingFormProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [selectedCard, setSelectedCard] = useState<ScryfallCard | null>(null);
   const [allCardPrints, setAllCardPrints] = useState<ScryfallCard[]>([]);
-  
   const [selectedVariant, setSelectedVariant] = useState<string>("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
-  
   const [selectedCardImage, setSelectedCardImage] = useState<string | null>(null);
   const [marketPrice, setMarketPrice] = useState<string | null>(null);
   const [condition, setCondition] = useState<string>("NM");
   const [quantity, setQuantity] = useState<number>(1);
-  const [selectedSet, setSelectedSet] = useState<string>("");
 
-  // 🔎 Autocomplete card names
+  // 🔎 Autocompletar nombres
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (cardName.length < 2) {
@@ -68,8 +65,7 @@ export function CreateListingForm({ t }: CreateListingFormProps) {
     return () => clearTimeout(timer);
   }, [cardName]);
 
-
-  // 🔎 Load all prints for the selected card
+  // 🔎 Cargar prints de la carta seleccionada
   const handleSuggestionClick = async (suggestion: Suggestion) => {
     setCardName(suggestion.name);
     setSuggestions([]);
@@ -82,29 +78,12 @@ export function CreateListingForm({ t }: CreateListingFormProps) {
 
     if (prints.length > 0) {
       const firstPrint = prints[0];
-      setSelectedSet(firstPrint.set);
+      setSelectedCard(firstPrint);
       setSelectedVariant(`${firstPrint.id}-${firstPrint.finishes[0]}`);
     }
   };
 
-  const uniqueEditions = useMemo(() => {
-    const seen = new Set<string>();
-    return allCardPrints.filter(print => {
-      if (seen.has(print.set)) {
-        return false;
-      } else {
-        seen.add(print.set);
-        return true;
-      }
-    });
-  }, [allCardPrints]);
-  
-  const printsForSelectedSet = useMemo(() => {
-    if (!selectedSet) return [];
-    return allCardPrints.filter(p => p.set === selectedSet);
-  }, [selectedSet, allCardPrints]);
-
-  // 📌 Update data when variant (edition/finish) changes
+  // 📌 Actualizar datos al cambiar de variante (edición/acabado)
   useEffect(() => {
     if (!selectedVariant || allCardPrints.length === 0) return;
 
@@ -135,7 +114,7 @@ export function CreateListingForm({ t }: CreateListingFormProps) {
     }
   }, [selectedVariant, allCardPrints, selectedLanguage]);
 
-  // 📌 Update image based on language
+  // 📌 Actualizar imagen según idioma
   useEffect(() => {
     if (!selectedLanguage || !selectedVariant || allCardPrints.length === 0) return;
 
@@ -155,7 +134,6 @@ export function CreateListingForm({ t }: CreateListingFormProps) {
 
   }, [selectedLanguage, selectedVariant, allCardPrints]);
 
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
@@ -170,9 +148,6 @@ export function CreateListingForm({ t }: CreateListingFormProps) {
            <CardDetailsForm
               t={t}
               allCardPrints={allCardPrints}
-              uniqueEditions={uniqueEditions}
-              selectedSet={selectedSet}
-              setSelectedSet={setSelectedSet}
               selectedVariant={selectedVariant}
               setSelectedVariant={setSelectedVariant}
               selectedLanguage={selectedLanguage}
@@ -182,7 +157,6 @@ export function CreateListingForm({ t }: CreateListingFormProps) {
               setCondition={setCondition}
               quantity={quantity}
               setQuantity={setQuantity}
-              printsForSelectedSet={printsForSelectedSet}
            />
         )}
       </Card>

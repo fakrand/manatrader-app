@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -97,7 +98,7 @@ export function CardDetailsForm({
             <Select value={selectedVariant} onValueChange={setSelectedVariant}>
                 <SelectTrigger>
                     <SelectValue placeholder="Select print variant" />
-                </SelectTrigger>
+                </Trigger>
                 <SelectContent>
                 {printsForSelectedSet.flatMap(print => 
                     print.finishes.map(finish => (
