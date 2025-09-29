@@ -1,4 +1,3 @@
-
 import { Suspense } from 'react';
 import { getDictionary } from '@/lib/dictionaries';
 import { Locale } from '@/i18n-config';

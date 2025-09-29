@@ -1,10 +1,13 @@
-
+import 'server-only'
+import type { Locale } from '../i18n-config'
 import type { Dictionary } from './definitions';
 
-// Directly import the Spanish dictionary.
-import es from '@/dictionaries/es.json';
+// We enumerate all dictionaries here for better linting and typescript support
+const dictionaries = {
+  es: () => import('@/dictionaries/es.json').then((module) => module.default),
+}
 
-// The function now simply returns the imported dictionary.
-export const getDictionary = async (): Promise<Dictionary> => {
-  return es;
-};
+export const getDictionary = async (locale: Locale): Promise<Dictionary> => {
+    const loader = dictionaries[locale] || dictionaries.es;
+    return loader();
+}

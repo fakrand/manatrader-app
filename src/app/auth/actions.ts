@@ -1,4 +1,3 @@
-
 'use server';
 
 import {
@@ -96,4 +95,3 @@ export async function verifyPhoneNumber(prevState: any, formData: FormData): Pro
         return { error: error.code || 'auth/default' };
     }
 }
-

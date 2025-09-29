@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef, useActionState } from 'react';
@@ -72,6 +71,7 @@ export function AuthForm({ t, lang }: AuthFormProps) {
             if (action === 'google') return signInWithGoogle(previousState, formData);
             if (action === 'sendCode') return sendVerificationCode(previousState, formData);
             if (action === 'verifyCode') return verifyPhoneNumber(previousState, formData);
+            if (action === 'signup') return signUpWithEmail(previousState, formData);
             // Default to email actions if not specified
             return signInWithEmail(previousState, formData);
         },
@@ -279,8 +279,8 @@ export function AuthForm({ t, lang }: AuthFormProps) {
                                 )}
                                 />
                                 <div className="flex gap-2">
-                                     <SubmitButton text={t.login} formAction={signInWithEmail} />
-                                     <Button type="submit" formAction={signUpWithEmail} variant="secondary" className="w-full">{t.signup}</Button>
+                                     <Button type="submit" formAction={(fd) => { fd.set('action', 'signin'); formAction(fd);}} className="w-full">{t.login}</Button>
+                                     <Button type="submit" formAction={(fd) => { fd.set('action', 'signup'); formAction(fd);}} variant="secondary" className="w-full">{t.signup}</Button>
                                 </div>
                             </form>
                         </Form>

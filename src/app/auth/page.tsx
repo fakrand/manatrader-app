@@ -1,4 +1,3 @@
-
 import { getDictionary } from '@/lib/dictionaries';
 import { AuthForm } from './auth-form';
 import { AuthLayout } from '@/hooks/use-auth';

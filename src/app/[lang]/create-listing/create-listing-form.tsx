@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -24,11 +23,10 @@ export interface ScryfallCard {
     usd_foil?: string;
     usd_etched?: string;
   };
-  variation_of?: string;
-  promo_types?: string[];
+  collector_number: string;
+  frame_effects?: string[];
   full_art?: boolean;
   border_crop?: string;
-  frame_effects?: string[];
 }
 
 export interface Suggestion {
@@ -87,14 +85,6 @@ export function CreateListingForm({ t, lang }: CreateListingFormProps) {
     }
   };
 
-  const printsForSelectedSet = useMemo(() => {
-    if (!selectedVariant) return [];
-    const [selectedId] = selectedVariant.split('-');
-    const selectedPrint = allCardPrints.find(p => p.id === selectedId);
-    if (!selectedPrint) return [];
-    return allCardPrints.filter(p => p.set === selectedPrint.set);
-  }, [selectedVariant, allCardPrints]);
-
   // 📌 Actualizar datos al cambiar de variante (edición/acabado)
   useEffect(() => {
     if (!selectedVariant || allCardPrints.length === 0) return;
@@ -104,7 +94,6 @@ export function CreateListingForm({ t, lang }: CreateListingFormProps) {
 
     if (selectedEdition) {
       setSelectedCard(selectedEdition);
-      setSelectedCardImage(selectedEdition.image_uris?.large || null);
 
       let price = null;
       if (finish === 'foil' && selectedEdition.prices?.usd_foil) {
@@ -147,20 +136,6 @@ export function CreateListingForm({ t, lang }: CreateListingFormProps) {
 
   }, [selectedLanguage, selectedVariant, allCardPrints]);
 
-
-  const uniqueEditions = useMemo(() => {
-    const seen = new Set<string>();
-    return allCardPrints.filter(print => {
-      if (seen.has(print.set)) {
-        return false;
-      } else {
-        seen.add(print.set);
-        return true;
-      }
-    });
-  }, [allCardPrints]);
-
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
@@ -175,7 +150,6 @@ export function CreateListingForm({ t, lang }: CreateListingFormProps) {
            <CardDetailsForm
               t={t}
               allCardPrints={allCardPrints}
-              uniqueEditions={uniqueEditions}
               selectedVariant={selectedVariant}
               setSelectedVariant={setSelectedVariant}
               selectedLanguage={selectedLanguage}
@@ -185,7 +159,6 @@ export function CreateListingForm({ t, lang }: CreateListingFormProps) {
               setCondition={setCondition}
               quantity={quantity}
               setQuantity={setQuantity}
-              printsForSelectedSet={printsForSelectedSet}
            />
         )}
       </Card>

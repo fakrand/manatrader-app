@@ -1,15 +1,14 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CardContent } from "@/components/ui/card";
 import { ScryfallCard } from "./create-listing-form";
 import type { Dictionary } from '@/lib/definitions';
+import { useMemo } from "react";
 
 interface CardDetailsFormProps {
   t: Dictionary['createListing'];
   allCardPrints: ScryfallCard[];
-  uniqueEditions: ScryfallCard[];
   selectedVariant: string;
   setSelectedVariant: (value: string) => void;
   selectedLanguage: string;
@@ -19,11 +18,10 @@ interface CardDetailsFormProps {
   setCondition: (value: string) => void;
   quantity: number;
   setQuantity: (value: number) => void;
-  printsForSelectedSet: ScryfallCard[];
 }
 
 function getVariantName(print: ScryfallCard, finish: string) {
-    let name = `${print.set_name} (${finish})`;
+    let name = `${finish.charAt(0).toUpperCase() + finish.slice(1)}`;
     if (print.frame_effects?.includes('showcase')) name = `${name} [Showcase]`;
     if (print.full_art) name = `${name} [Full Art]`;
     if (print.border_crop && !print.full_art) name = `${name} [Borderless]`;
@@ -34,7 +32,6 @@ function getVariantName(print: ScryfallCard, finish: string) {
 export function CardDetailsForm({
   t,
   allCardPrints,
-  uniqueEditions,
   selectedVariant,
   setSelectedVariant,
   selectedLanguage,
@@ -44,25 +41,32 @@ export function CardDetailsForm({
   setCondition,
   quantity,
   setQuantity,
-  printsForSelectedSet
 }: CardDetailsFormProps) {
-  const [selectedSet, setSelectedSet] = useState<string>(uniqueEditions[0]?.set || "");
 
-  useEffect(() => {
-    if (uniqueEditions.length > 0 && !selectedSet) {
-      setSelectedSet(uniqueEditions[0].set);
-    }
-    // Set a default variant when the set changes or on initial load
-    if (selectedSet) {
-        const firstPrintInSet = allCardPrints.find(p => p.set === selectedSet);
-        if (firstPrintInSet) {
-            setSelectedVariant(`${firstPrintInSet.id}-${firstPrintInSet.finishes[0]}`);
-        }
-    }
-  }, [selectedSet, uniqueEditions, allCardPrints, setSelectedVariant]);
+  const uniqueEditions = useMemo(() => {
+    const seen = new Set<string>();
+    return allCardPrints.filter(print => {
+      if (seen.has(print.set)) {
+        return false;
+      } else {
+        seen.add(print.set);
+        return true;
+      }
+    });
+  }, [allCardPrints]);
+  
+  const selectedPrintData = useMemo(() => {
+    if (!selectedVariant) return null;
+    const [selectedId] = selectedVariant.split('-');
+    return allCardPrints.find(p => p.id === selectedId) || null;
+  }, [selectedVariant, allCardPrints]);
+
+  const printsForSelectedSet = useMemo(() => {
+    if (!selectedPrintData) return [];
+    return allCardPrints.filter(p => p.set === selectedPrintData.set);
+  }, [selectedPrintData, allCardPrints]);
 
   const handleEditionChange = (setAbbr: string) => {
-    setSelectedSet(setAbbr);
     const firstPrintInNewSet = allCardPrints.find(p => p.set === setAbbr);
     if(firstPrintInNewSet) {
         // Automatically select the first variant of the new set
@@ -75,13 +79,13 @@ export function CardDetailsForm({
     <CardContent className="space-y-4 p-4 pt-0">
         <div>
             <Label>{t.editionLabel}</Label>
-            <Select value={selectedSet} onValueChange={handleEditionChange}>
+            <Select value={selectedPrintData?.set || ''} onValueChange={handleEditionChange}>
                 <SelectTrigger>
                     <SelectValue placeholder={t.selectEdition} />
                 </SelectTrigger>
                 <SelectContent>
                     {uniqueEditions.map(edition => (
-                        <SelectItem key={edition.id} value={edition.set}>
+                        <SelectItem key={edition.set} value={edition.set}>
                             {edition.set_name}
                         </SelectItem>
                     ))}
@@ -153,6 +157,3 @@ export function CardDetailsForm({
     </CardContent>
   );
 }
-
-// Need to import useEffect and useState
-import { useEffect, useState } from "react";

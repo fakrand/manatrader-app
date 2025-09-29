@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -22,20 +21,21 @@ const AuthContext = createContext<AuthContextType>({
   signOut: () => {},
 });
 
-const protectedRoutes = ['/profile', '/create-listing'];
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  
+  const protectedRoutes = ['/profile', '/create-listing'];
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
 
-      if (!user && protectedRoutes.some(route => pathname.startsWith(route))) {
+      const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+      if (!user && isProtectedRoute) {
         router.push(`/auth`);
       }
     });
@@ -57,8 +57,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => useContext(AuthContext);
 
-// The AuthLayout component is removed from here to be handled by the page itself.
-// This was a source of server/client context conflicts.
 export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
   const router = useRouter();

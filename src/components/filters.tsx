@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useTransition, useCallback } from 'react';
@@ -19,12 +18,13 @@ import { Button } from './ui/button';
 import { ManaSymbol } from './mana-symbol';
 import { cn } from '@/lib/utils';
 import { Dictionary } from '@/lib/definitions';
+import { Locale } from '@/i18n-config';
 
 const conditions = ['NM', 'LP', 'MP', 'HP', 'DMG'];
 const languages = ['English', 'Spanish', 'Japanese'];
 const colors: ('W' | 'U' | 'B' | 'R' | 'G')[] = ['W', 'U', 'B', 'R', 'G'];
 
-export function Filters({ dict }: { dict: Dictionary['home']['filters'] }) {
+export function Filters({ dict, lang }: { dict: Dictionary['home']['filters'], lang: Locale }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
